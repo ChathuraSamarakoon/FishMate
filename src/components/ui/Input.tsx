@@ -9,7 +9,9 @@ export function Input({ label, style, nativeID, ...props }: InputProps) {
   const inputId = nativeID ?? id;
   return (
     <View style={styles.container}>
-      <Text nativeID={`${inputId}-label`} style={styles.label}>{label}</Text>
+      <Text nativeID={`${inputId}-label`} style={styles.label}>
+        {label}
+      </Text>
       <TextInput
         {...props}
         nativeID={inputId}

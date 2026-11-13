@@ -1,32 +1,21 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Navbar } from '@/components/Navbar';
-import { theme } from '@/constants/theme';
 
+/** Screens own their safe areas; no global navbar/scrollview around the splash. */
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar style="dark" />
-        <ScrollView contentContainerStyle={styles.scroll}>
-          <View style={styles.content}>
-            <Navbar />
-            <View style={styles.screen}>
-              <Stack screenOptions={{ headerShown: false, contentStyle: styles.stack }} />
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <>
+      <StatusBar style="dark" backgroundColor="#FBFCF8" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#FBFCF8' },
+        }}
+      >
+        <Stack.Screen name="index" options={{ animation: 'none' }} />
+        <Stack.Screen name="welcome" options={{ animation: 'none' }} />
+        <Stack.Screen name="role-select" options={{ animation: 'fade' }} />
+      </Stack>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: theme.colors.background },
-  scroll: { flexGrow: 1, padding: theme.spacing.md },
-  content: { width: '100%', maxWidth: theme.contentWidth, alignSelf: 'center', gap: theme.spacing.lg, flex: 1 },
-  screen: { flex: 1, minHeight: 280 },
-  stack: { backgroundColor: theme.colors.background },
-});
