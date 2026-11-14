@@ -13,7 +13,6 @@ import { FishermanShell } from '@/components/fisherman/FishermanShell';
 import { FishermanIcon } from '@/components/fisherman/FishermanIcon';
 import { money } from '@/components/fisherman/atoms';
 import { fishermanUi as ui } from '@/components/fisherman/theme';
-import { currentFishermanProfile } from '@/data/fishermanData';
 import { useFisherman } from '@/components/fisherman/FishermanContext';
 
 const FISHING_ZONES = [
@@ -24,7 +23,7 @@ const FISHING_ZONES = [
 ];
 
 export default function S12NewTripScreen() {
-  const { addTrip } = useFisherman();
+  const { addTrip, profile } = useFisherman();
   const [selectedZone, setSelectedZone] = useState(FISHING_ZONES[0]);
   const [crewCount, setCrewCount] = useState('4');
   const [fuelLitres] = useState('45');
@@ -44,7 +43,7 @@ export default function S12NewTripScreen() {
     addTrip({
       id: `trip-${Date.now()}`,
       tripNumber: `TR-${110 + Math.floor(Math.random() * 20)}`,
-      boatName: currentFishermanProfile.boatName,
+      boatName: profile.boatName ?? 'Sagara Rani II',
       harbor: selectedZone.name,
       departureDate: 'Just now',
       returnDate: `In ~${expectedHours} hrs`,
@@ -57,7 +56,7 @@ export default function S12NewTripScreen() {
 
     Alert.alert(
       'Sea Voyage Logged! (S12)',
-      `Voyage on ${currentFishermanProfile.boatName} recorded to ${selectedZone.name}.\n\nTotal estimated trip expense: ${money(totalExpense)}.\nTarget duration: ~${expectedHours} hours.\n\nDashboard trips count and live activity have been updated!`,
+      `Voyage on ${profile.boatName ?? 'Sagara Rani II'} recorded to ${selectedZone.name}.\n\nTotal estimated trip expense: ${money(totalExpense)}.\nTarget duration: ~${expectedHours} hours.\n\nDashboard trips count and live activity have been updated!`,
       [
         {
           text: 'View Sea Trips',
@@ -93,9 +92,9 @@ export default function S12NewTripScreen() {
           <FishermanIcon name="boat" size={24} color={ui.tealDark} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.vesselName}>{currentFishermanProfile.boatName}</Text>
+          <Text style={styles.vesselName}>{profile.boatName ?? 'Sagara Rani II'}</Text>
           <Text style={styles.vesselSub}>
-            Registration: {currentFishermanProfile.registrationNumber} · {currentFishermanProfile.village}
+            Registration: {profile.registrationNumber ?? 'CFV-A-4198-NEG'} · {profile.village}
           </Text>
         </View>
         <View style={styles.vesselStatusPill}>

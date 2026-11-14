@@ -48,6 +48,16 @@ export type FishermanProfile = {
   avatar: ImageSourcePropType;
   shopImages: ImageSourcePropType[];
   specialties: string[];
+  boatName?: string;
+  registrationNumber?: string;
+  stallAddress?: string;
+  harborMooring?: string;
+  operatingHours?: string;
+  deliveryAvailable?: boolean;
+  maxDistanceKm?: number;
+  deliveryFee?: number;
+  freeDeliveryThreshold?: number;
+  deliveryTowns?: string[];
 };
 
 export type FishermanOrderStatus =

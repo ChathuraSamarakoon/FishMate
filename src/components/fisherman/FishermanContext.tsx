@@ -6,9 +6,11 @@ import type {
   FishermanInquiryItem,
   FishermanOrder,
   FishermanOrderStatus,
+  FishermanProfile,
   FishingTrip,
 } from '@/types';
 import {
+  currentFishermanProfile,
   defaultFishermanActivities,
   defaultFishermanInquiries,
   defaultFishermanOrders,
@@ -18,12 +20,14 @@ import {
 import { fishListings } from '@/data/mockData';
 
 type FishermanContextType = {
+  profile: FishermanProfile;
   orders: FishermanOrder[];
   inquiries: FishermanInquiryItem[];
   trips: FishingTrip[];
   listings: FishListing[];
   activities: FishermanActivity[];
   summary: FishermanDashboardSummary;
+  updateProfile: (updates: Partial<FishermanProfile>) => void;
   addListing: (newListing: FishListing) => void;
   toggleListingStock: (listingId: string) => void;
   addTrip: (newTrip: FishingTrip) => void;
@@ -39,6 +43,7 @@ type FishermanContextType = {
 const FishermanContext = createContext<FishermanContextType | null>(null);
 
 export function FishermanProvider({ children }: { children: ReactNode }) {
+  const [profile, setProfile] = useState<FishermanProfile>(currentFishermanProfile);
   const [orders, setOrders] = useState<FishermanOrder[]>(defaultFishermanOrders);
   const [inquiries, setInquiries] = useState<FishermanInquiryItem[]>(defaultFishermanInquiries);
   const [trips, setTrips] = useState<FishingTrip[]>(defaultFishingTrips);
@@ -162,6 +167,19 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateProfile = (updates: Partial<FishermanProfile>) => {
+    setProfile((prev) => {
+      const nextTowns = updates.deliveryTowns ?? prev.deliveryTowns ?? ['Negombo'];
+      const nextDist = updates.maxDistanceKm ?? prev.maxDistanceKm ?? 15;
+      const derivedRadius = `${nextDist} km radius (${nextTowns.slice(0, 3).join(', ')})`;
+      return {
+        ...prev,
+        ...updates,
+        deliveryRadius: updates.deliveryRadius ?? derivedRadius,
+      };
+    });
+  };
+
   const clearOrders = () => {
     setOrders([]);
   };
@@ -171,6 +189,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
   };
 
   const resetDemoData = () => {
+    setProfile(currentFishermanProfile);
     setOrders(defaultFishermanOrders);
     setInquiries(defaultFishermanInquiries);
     setTrips(defaultFishingTrips);
@@ -190,6 +209,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
   };
 
   const value: FishermanContextType = {
+    profile,
     orders: isSimulatingEmpty ? [] : orders,
     inquiries: isSimulatingEmpty ? [] : inquiries,
     trips,
@@ -202,6 +222,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
           newInquiriesCount: 0,
         }
       : dynamicSummary,
+    updateProfile,
     addListing,
     toggleListingStock,
     addTrip,

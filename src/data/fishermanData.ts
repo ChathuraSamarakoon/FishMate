@@ -9,8 +9,9 @@ import type {
 
 const fisherman1 = require('../../assets/customer/fisherman_1.jpg');
 const shop1 = require('../../assets/customer/shop_1.jpg');
+const shop2 = require('../../assets/customer/shop_2.jpg');
 
-export const currentFishermanProfile: FishermanProfile & { boatName: string; registrationNumber: string } = {
+export const currentFishermanProfile: FishermanProfile = {
   id: 'fisher-01',
   name: 'Sunil Perera',
   title: 'Master Fisherman & Harbor Supplier',
@@ -23,10 +24,18 @@ export const currentFishermanProfile: FishermanProfile & { boatName: string; reg
   rating: 4.9,
   completedOrders: 284,
   avatar: fisherman1,
-  shopImages: [shop1],
-  specialties: ['Yellowfin tuna', 'Red snapper', 'Sea prawns', 'Cleaned fillets'],
+  shopImages: [shop1, shop2],
+  specialties: ['Yellowfin tuna', 'Red snapper', 'Sea prawns', 'King mackerel', 'Cleaned fillets'],
   boatName: 'Sagara Rani II',
   registrationNumber: 'CFV-A-4198-NEG',
+  stallAddress: 'Stall #14, Pier Gate 02, Negombo Fish Harbor, Marine Drive',
+  harborMooring: 'Berth A-07 (Opposite Ice Factory)',
+  operatingHours: '05:00 AM – 02:00 PM (Daily boat landing sales)',
+  deliveryAvailable: true,
+  maxDistanceKm: 15,
+  deliveryFee: 250,
+  freeDeliveryThreshold: 5000,
+  deliveryTowns: ['Negombo', 'Kochchikade', 'Ja-Ela', 'Seeduwa', 'Katunayake'],
 };
 
 export const defaultFishermanSummary: FishermanDashboardSummary = {

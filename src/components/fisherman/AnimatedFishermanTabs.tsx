@@ -36,6 +36,8 @@ export function AnimatedFishermanTabs({ current }: { current: string }) {
       ? 'listings'
       : current === 's12'
       ? 'trips'
+      : current === 's03' || current === 's04' || current === 'a07'
+      ? 'profile'
       : current;
 
   const index = Math.max(

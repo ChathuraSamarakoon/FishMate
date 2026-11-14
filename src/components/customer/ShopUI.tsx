@@ -15,8 +15,9 @@ export function ShopPrimaryButton({ label, onPress, disabled, alternate }: { lab
 export function ShopHeading({ title, caption }: { title:string; caption?:string }) {
   return <View style={s.heading}><Text style={s.headingTitle}>{title}</Text>{caption?<Text style={s.headingCaption}>{caption}</Text>:null}</View>;
 }
-export function CostSummary({ subtotal, fee, total }: {subtotal:number; fee:number; total:number}) {
-  return <View style={s.costCard}><View style={s.costRow}><Text style={s.costLabel}>Seafood subtotal</Text><Text style={s.costValue}>{formatMoney(subtotal)}</Text></View><View style={s.costRow}><Text style={s.costLabel}>Demo delivery fee</Text><Text style={s.costValue}>{formatMoney(fee)}</Text></View><View style={s.divider}/><View style={s.costRow}><Text style={s.totalLabel}>Total</Text><Text style={s.totalValue}>{formatMoney(total)}</Text></View></View>;
+export function CostSummary({ subtotal, fee, deliveryFee, total }: {subtotal:number; fee?:number; deliveryFee?:number; total:number}) {
+  const displayFee = fee ?? deliveryFee ?? 0;
+  return <View style={s.costCard}><View style={s.costRow}><Text style={s.costLabel}>Seafood subtotal</Text><Text style={s.costValue}>{formatMoney(subtotal)}</Text></View><View style={s.costRow}><Text style={s.costLabel}>Demo delivery fee</Text><Text style={s.costValue}>{formatMoney(displayFee)}</Text></View><View style={s.divider}/><View style={s.costRow}><Text style={s.totalLabel}>Total</Text><Text style={s.totalValue}>{formatMoney(total)}</Text></View></View>;
 }
 export function OrderStatusPill({ status }: {status:ShopOrder['status']}) {
   const completed=status==='delivered'; const waiting=status==='awaiting_payment';

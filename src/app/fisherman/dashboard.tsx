@@ -22,13 +22,13 @@ import {
   money,
 } from '@/components/fisherman/atoms';
 import { fishermanUi as ui } from '@/components/fisherman/theme';
-import { currentFishermanProfile } from '@/data/fishermanData';
 import { getSession } from '@/services/demoAuth';
 import { useFisherman } from '@/components/fisherman/FishermanContext';
 
 export default function FishermanDashboardScreen() {
   const session = getSession();
   const {
+    profile,
     orders,
     inquiries,
     summary,
@@ -44,7 +44,7 @@ export default function FishermanDashboardScreen() {
   const sellerName =
     session && session.role === 'fisherman'
       ? session.fullName
-      : currentFishermanProfile.name;
+      : profile.name;
   const sellerFirstName = sellerName.split(' ')[0];
 
   // Quick order status update for demo interactivity
@@ -86,7 +86,7 @@ export default function FishermanDashboardScreen() {
   return (
     <FishermanShell
       title={`Ayubowan, ${sellerFirstName}!`}
-      subtitle={currentFishermanProfile.village}
+      subtitle={profile.village}
       rightIcon="plus"
       rightLabel="Add Fish (S06)"
       onRightPress={() => router.push('/fisherman/s06')}
@@ -95,7 +95,7 @@ export default function FishermanDashboardScreen() {
       <View style={styles.sellerHeaderCard}>
         <View style={styles.sellerTopRow}>
           <Image
-            source={currentFishermanProfile.avatar}
+            source={profile.avatar}
             style={styles.sellerAvatar}
             resizeMode="cover"
           />
@@ -112,7 +112,7 @@ export default function FishermanDashboardScreen() {
             <View style={styles.harborRow}>
               <FishermanIcon name="pin" size={12} color={ui.tealDark} />
               <Text numberOfLines={1} style={styles.harborText}>
-                {currentFishermanProfile.village} · {currentFishermanProfile.boatName}
+                {profile.village} · {profile.boatName}
               </Text>
             </View>
           </View>
@@ -152,8 +152,8 @@ export default function FishermanDashboardScreen() {
           </Pressable>
 
           <View style={styles.ratingBadge}>
-            <Text style={styles.ratingText}>★ {currentFishermanProfile.rating}</Text>
-            <Text style={styles.ratingSub}>({currentFishermanProfile.completedOrders})</Text>
+            <Text style={styles.ratingText}>★ {profile.rating}</Text>
+            <Text style={styles.ratingSub}>({profile.completedOrders})</Text>
           </View>
         </View>
       </View>

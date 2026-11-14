@@ -17,6 +17,9 @@ export default function FishermanLayout() {
     's12',
     's09',
     's21',
+    's03',
+    's04',
+    'a07',
   ].includes(segment);
 
   return (
@@ -38,6 +41,9 @@ export default function FishermanLayout() {
           <Stack.Screen name="s22" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s09" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s21" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s03" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s04" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="a07" options={{ animation: 'slide_from_right' }} />
         </Stack>
         {showTabs ? <AnimatedFishermanTabs current={segment} /> : null}
       </View>
