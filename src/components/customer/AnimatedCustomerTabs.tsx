@@ -95,13 +95,13 @@ export function AnimatedCustomerTabs({ current }: { current: string }) {
           pointerEvents="none"
           style={[
             styles.orbHolder,
-            { left: 8 + (slot - 60) / 2, transform: [{ translateX: x }, { scale: rise }] },
+            { left: 8 + (slot - 52) / 2, transform: [{ translateX: x }, { scale: rise }] },
           ]}
         >
           <View style={styles.orb}>
             <View style={styles.orbInner}>
               <View style={styles.orbShine} />
-              <CustomerIcon name={TABS[index].icon} size={29} color="#FFFFFF" />
+              <CustomerIcon name={TABS[index].icon} size={25} color="#FFFFFF" />
             </View>
           </View>
         </Animated.View>
@@ -126,7 +126,7 @@ export function AnimatedCustomerTabs({ current }: { current: string }) {
                 <View pointerEvents="none" style={styles.divider} />
               ) : null}
               <View style={styles.tabIconBox}>
-                {active ? null : <CustomerIcon name={tab.icon} size={25} color="#BCECF5" />}
+                {active ? null : <CustomerIcon name={tab.icon} size={22} color="#BCECF5" />}
               </View>
               <Text style={[styles.label, active && styles.activeLabel]}>{tab.label}</Text>
             </Pressable>
@@ -140,8 +140,8 @@ export function AnimatedCustomerTabs({ current }: { current: string }) {
 const styles = StyleSheet.create({
   absolute: { position: 'absolute', left: 0, right: 0, alignItems: 'center', zIndex: 20 },
   dock: {
-    height: 86,
-    borderRadius: 44,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: '#063F50',
     borderColor: '#16D5D7',
     borderWidth: 2,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    borderRadius: 42,
+    borderRadius: 34,
     borderWidth: 2,
     borderTopColor: '#438B9C',
     borderLeftColor: '#087E91',
@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
   },
   pillTrack: {
     position: 'absolute',
-    height: 80,
+    height: 66,
     left: 6,
     top: 1,
-    borderRadius: 40,
+    borderRadius: 33,
     backgroundColor: '#076878',
     borderRightWidth: 1,
     borderColor: '#23BBC1',
@@ -180,16 +180,16 @@ const styles = StyleSheet.create({
   orbHolder: {
     position: 'absolute',
     top: -11,
-    width: 60,
-    height: 60,
+    width: 52,
+    height: 52,
     zIndex: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   orb: {
-    height: 60,
-    width: 60,
-    borderRadius: 30,
+    height: 52,
+    width: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#00B8BA',
@@ -202,8 +202,8 @@ const styles = StyleSheet.create({
     elevation: 9,
   },
   orbInner: {
-    width: 51,
-    height: 51,
+    width: 44,
+    height: 44,
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
@@ -222,19 +222,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(105,255,236,0.25)',
   },
   tab: {
-    height: 80,
+    height: 66,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
+    gap: 3,
     zIndex: 2,
     paddingBottom: 5,
   },
-  tabIconBox: { height: 30, alignItems: 'center', justifyContent: 'center' },
+  tabIconBox: { height: 26, alignItems: 'center', justifyContent: 'center' },
   label: { fontSize: 11, color: '#C7EFF7', fontWeight: '700' },
   activeLabel: { color: '#FFFFFF', fontWeight: '800' },
   indicator: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 7,
     width: 34,
     height: 4,
     borderRadius: 3,
@@ -247,9 +247,9 @@ const styles = StyleSheet.create({
   divider: {
     position: 'absolute',
     left: 0,
-    top: 26,
+    top: 22,
     width: 1,
-    height: 27,
+    height: 23,
     backgroundColor: '#2D8295',
   },
 });
