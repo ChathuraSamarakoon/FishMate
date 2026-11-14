@@ -49,3 +49,82 @@ export type FishermanProfile = {
   shopImages: ImageSourcePropType[];
   specialties: string[];
 };
+
+export type FishermanOrderStatus =
+  | 'pending'
+  | 'preparing'
+  | 'ready'
+  | 'dispatched'
+  | 'completed'
+  | 'cancelled';
+
+export type FishermanOrderItem = {
+  listingId: string;
+  fishName: string;
+  quantityKg: number;
+  pricePerKg: number;
+  totalPrice: number;
+};
+
+export type FishermanOrder = {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerLocation: string;
+  items: FishermanOrderItem[];
+  totalAmount: number;
+  status: FishermanOrderStatus;
+  createdAt: string;
+  deliveryTime: string;
+  note?: string;
+};
+
+export type FishermanInquiryItem = {
+  id: string;
+  customerName: string;
+  customerPhone?: string;
+  listingId?: string;
+  listingName?: string;
+  message: string;
+  timeAgo: string;
+  unread: boolean;
+  replied: boolean;
+};
+
+export type FishingTrip = {
+  id: string;
+  tripNumber: string;
+  boatName: string;
+  harbor: string;
+  departureDate: string;
+  returnDate: string;
+  catchVolumeKg: number;
+  fuelCost: number;
+  iceBaitCost: number;
+  otherCost: number;
+  status: 'completed' | 'ongoing' | 'planned';
+};
+
+export type FishermanActivity = {
+  id: string;
+  type: 'order' | 'inquiry' | 'trip' | 'payment' | 'listing';
+  title: string;
+  description: string;
+  timeAgo: string;
+  badge?: string;
+};
+
+export type FishermanDashboardSummary = {
+  activeListingsCount: number;
+  newInquiriesCount: number;
+  pendingOrdersCount: number;
+  totalTripsCount: number;
+  monthlyRevenue: number;
+  estimatedProfit: number;
+  revenueGrowthPercent: number;
+  profitMarginPercent: number;
+  fuelCost: number;
+  iceBaitCost: number;
+  harborFee: number;
+};

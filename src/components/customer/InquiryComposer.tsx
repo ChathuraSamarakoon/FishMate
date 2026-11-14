@@ -37,7 +37,7 @@ export function InquiryComposer({ sellerId, listingId, visible, onClose }: Props
 }
 const styles=StyleSheet.create({
   cover: { flex:1, justifyContent:'flex-end' },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor:'rgba(8,27,42,.45)' },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(8,27,42,.45)' },
   sheet: { borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 24, paddingBottom: 30, paddingTop: 14, backgroundColor: customerUi.surface },
   handle: { width: 44, height: 5, borderRadius: 4, backgroundColor: '#D6E7E5', alignSelf:'center', marginBottom: 22 },
   eyebrow: { fontSize: 10, color: customerUi.tealDark, fontWeight:'900', letterSpacing:1.7 },
