@@ -12,6 +12,7 @@ type Props = {
   title?: string;
   subtitle?: string;
   back?: boolean;
+  onBack?: () => void;
   rightIcon?: FishermanIconName;
   rightLabel?: string;
   onRightPress?: () => void;
@@ -23,6 +24,7 @@ export function FishermanShell({
   title,
   subtitle,
   back,
+  onBack,
   rightIcon,
   rightLabel,
   onRightPress,
@@ -33,7 +35,9 @@ export function FishermanShell({
       <View style={styles.header}>
         <Pressable
           onPress={
-            back
+            onBack
+              ? onBack
+              : back
               ? () => {
                   if (router.canGoBack()) router.back();
                   else router.replace('/fisherman/dashboard');
