@@ -12,8 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { CustomerIcon } from '@/components/customer/Icon';
-import { featuredListings, fishermen } from '@/data/mockData';
-import { SellerCard } from '@/components/customer/atoms';
+import { featuredListings, fishermen, nearbyListings } from '@/data/mockData';
+import { FishCard, SellerCard } from '@/components/customer/atoms';
 import { getSession } from '@/services/demoAuth';
 import { useMarketplace } from '@/components/customer/MarketplaceContext';
 
@@ -214,7 +214,17 @@ export default function CustomerHome() {
                   <Text style={styles.freshText}>🌿 Fresh Catch</Text>
                 </View>
                 <View style={styles.fishCaption}>
-                  <Text style={styles.fishName}>{item.name}</Text>
+                  <View style={styles.listingTitleRow}>
+                    <Text style={styles.fishName}>{item.name}</Text>
+                    <Text style={styles.listingRating}>? {item.rating.toFixed(1)}</Text>
+                  </View>
+                  <Text numberOfLines={2} style={styles.listingDescription}>
+                    {item.shortDescription}
+                  </Text>
+                  <View style={styles.listingLocation}>
+                    <CustomerIcon name="pin" size={13} color="#667D85" />
+                    <Text style={styles.listingMeta}>{item.location} ? {item.stockLabel}</Text>
+                  </View>
                   <Text style={styles.fishPrice}>Rs. {item.price.toLocaleString()}/kg</Text>
                 </View>
               </Pressable>
@@ -255,9 +265,32 @@ export default function CustomerHome() {
             }
           />
         ))}
-        <Text style={styles.demoNote}>
-          Sample listings · Prices and availability are illustrative.
-        </Text>
+        <View style={styles.picksHeading}>
+          <View style={styles.picksCopy}>
+            <Text accessibilityRole="header" style={styles.sectionTitle}>More fresh finds</Text>
+            <Text style={styles.sectionSubtitle}>Discover more catches from nearby sellers</Text>
+          </View>
+          <Pressable onPress={openSearch} accessibilityRole="button" style={styles.seeAll}>
+            <Text style={styles.seeAllText}>Search</Text>
+            <CustomerIcon name="chevron-right" size={16} color="#007D82" />
+          </Pressable>
+        </View>
+        {nearbyListings.map((item) => (
+          <FishCard
+            key={item.id}
+            item={item}
+            variant="row"
+            onPress={() =>
+              router.push({ pathname: '/customer/listing/[id]', params: { id: item.id } })
+            }
+          />
+        ))}
+        <View style={styles.demoDisclaimer}>
+          <CustomerIcon name="sparkles" size={18} color="#007D82" />
+          <Text style={styles.demoNote}>
+            FishMate UI preview ? Prices, sellers, ratings and delivery times are demo data, not real offers.
+          </Text>
+        </View>
       </ScrollView>
       <View pointerEvents="none" style={styles.footerWaves}>
         <View style={styles.waveBack} />
@@ -524,7 +557,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fishCaption: { padding: 12, gap: 4 },
-  fishName: { fontSize: 14, fontWeight: '800', color: '#0B1531' },
+  fishName: { flex: 1, fontSize: 14, fontWeight: '800', color: '#0B1531' },
   fishPrice: { color: '#007D82', fontSize: 12, fontWeight: '700' },
-  demoNote: { color: '#667D85', fontSize: 10, textAlign: 'center', marginTop: 8 },
+  listingTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  listingRating: { fontSize: 11, fontWeight: '800', color: '#A16E0B' },
+  listingDescription: { fontSize: 11, lineHeight: 16, color: '#667D85' },
+  listingLocation: { flexDirection: 'row', alignItems: 'center', gap: 4, marginVertical: 4 },
+  listingMeta: { flex: 1, fontSize: 10, color: '#667D85' },
+  demoDisclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, padding: 14, borderRadius: 17, backgroundColor: '#DFF5F3', marginTop: 17 },
+  demoNote: { flex: 1, color: '#667D85', fontSize: 11, lineHeight: 17 },
 });
