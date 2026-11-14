@@ -29,6 +29,7 @@ type FishermanContextType = {
   summary: FishermanDashboardSummary;
   updateProfile: (updates: Partial<FishermanProfile>) => void;
   addListing: (newListing: FishListing) => void;
+  updateListing: (listingId: string, updates: Partial<FishListing>) => void;
   toggleListingStock: (listingId: string) => void;
   addTrip: (newTrip: FishingTrip) => void;
   updateOrderStatus: (orderId: string, nextStatus?: FishermanOrderStatus) => void;
@@ -99,11 +100,31 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     setActivities((prev) => [activity, ...prev]);
   };
 
+  const updateListing = (listingId: string, updates: Partial<FishListing>) => {
+    setListings((prev) =>
+      prev.map((item) => (item.id === listingId ? { ...item, ...updates } : item)),
+    );
+    const activity: FishermanActivity = {
+      id: `act-${Date.now()}`,
+      type: 'listing',
+      title: 'Catch listing updated',
+      description: `${updates.name ?? 'Fish item'} details & stock availability updated`,
+      timeAgo: 'Just now',
+      badge: updates.stockLabel ?? 'Inventory',
+    };
+    setActivities((prev) => [activity, ...prev]);
+  };
+
   const toggleListingStock = (listingId: string) => {
     setListings((prev) =>
       prev.map((item) => {
         if (item.id !== listingId) return item;
-        const next = item.stockLabel === 'Ready stock' ? 'Limited stock' : 'Ready stock';
+        const next =
+          item.stockLabel === 'Ready stock'
+            ? 'Limited stock'
+            : item.stockLabel === 'Limited stock'
+            ? 'Unavailable'
+            : 'Ready stock';
         return { ...item, stockLabel: next };
       }),
     );
@@ -224,6 +245,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
       : dynamicSummary,
     updateProfile,
     addListing,
+    updateListing,
     toggleListingStock,
     addTrip,
     updateOrderStatus,
