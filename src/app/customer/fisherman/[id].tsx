@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CustomerShell } from '@/components/customer/CustomerShell';
 import { CustomerIcon } from '@/components/customer/Icon';
 import { FishCard, SectionHeader, StatCard } from '@/components/customer/atoms';
-import { InquiryComposer } from '@/components/customer/InquiryComposer';
 import { customerUi as c } from '@/components/customer/theme';
 import { getFishermanById, getListingsBySellerId } from '@/data/mockData';
 
 export default function FishermanPublicProfile() {
   const { id } = useLocalSearchParams<{id?: string}>();
   const seller=getFishermanById(id);
-  const [compose,setCompose]=useState(false);
   if(!seller) return <CustomerShell back title="Seller not found" hideNavPadding><Text style={styles.desc}>This demo seller could not be found.</Text><Pressable onPress={()=>router.replace('/customer/home')}><Text style={styles.link}>Back to marketplace</Text></Pressable></CustomerShell>;
   const listings=getListingsBySellerId(seller.id);
   return <CustomerShell back title="Fisherman profile" subtitle="Meet your local seafood seller" hideNavPadding>
@@ -22,7 +19,7 @@ export default function FishermanPublicProfile() {
       <Text style={styles.role}>{seller.title}</Text>
       <View style={styles.locationRow}><CustomerIcon name="pin" color={c.tealDark} size={15}/><Text style={styles.location}>{seller.village}</Text></View>
       <Text style={styles.bio}>{seller.bio}</Text>
-      <Pressable onPress={()=>setCompose(true)} accessibilityRole="button" style={styles.contact}><CustomerIcon name="message" color="#FFFFFF" size={19}/><Text style={styles.contactLabel}>Connect with fisherman</Text></Pressable>
+      <Pressable onPress={() => router.push({ pathname: '/customer/connect', params: { sellerId: seller.id } })} accessibilityRole="button" style={styles.contact}><CustomerIcon name="message" color="#FFFFFF" size={19}/><Text style={styles.contactLabel}>Connect with fisherman</Text></Pressable>
     </View>
 
     <View style={styles.stats}><StatCard label="Sample rating" value={`★ ${seller.rating.toFixed(1)}`}/><StatCard label="Sample orders" value={`${seller.completedOrders}+`} icon="bag"/></View>
@@ -39,7 +36,6 @@ export default function FishermanPublicProfile() {
     <SectionHeader title="Available from this seller" subtitle={`${listings.length} sample listing(s)`}/>
     {listings.map(item=><FishCard key={item.id} item={item} variant="row" onPress={()=>router.push(`/customer/listing/${item.id}` as never)}/>)}
     <Text style={styles.disclaimer}>This is an interactive frontend prototype. Seller identities and photos are generated demo data.</Text>
-    <InquiryComposer visible={compose} onClose={()=>setCompose(false)} sellerId={seller.id}/>
   </CustomerShell>;
 }
 const styles=StyleSheet.create({

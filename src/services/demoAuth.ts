@@ -5,12 +5,18 @@
  * Production: Laravel endpoints, server-generated expiring OTP, rate limiting,
  * server-side password hashing, secure authenticated sessions/token storage.
  */
+import type { AvatarTheme, CustomerProfileDraft } from '@/utils/customerProfileUtils';
+
 export type UserRole = 'customer' | 'fisherman';
 export type DemoAccount = {
   fullName: string;
   phone: string;
   role: UserRole;
   password: string; // in-memory DEMO ONLY. Never store plaintext passwords in production.
+  email?: string;
+  city?: string;
+  address?: string;
+  avatarTheme?: AvatarTheme;
 };
 export const DEMO_OTP = '1234';
 const accounts: DemoAccount[] = [
@@ -68,4 +74,37 @@ export function logout() { activeAccount = null; }
 export function maskPhone(phone: string) {
   const normalized = normalizePhone(phone);
   return normalized.length > 4 ? `${normalized.slice(0, 3)} ••• ${normalized.slice(-4)}` : normalized;
+}
+
+// Profile editing for the LOCAL frontend demo. No server, SMS or photo uploads.
+export type CustomerProfileSnapshot = CustomerProfileDraft & { role: 'customer' };
+
+export function getCustomerProfile(): CustomerProfileSnapshot | null {
+  if (!activeAccount || activeAccount.role !== 'customer') return null;
+  return {
+    role: 'customer',
+    fullName: activeAccount.fullName,
+    phone: activeAccount.phone,
+    email: activeAccount.email ?? '',
+    city: activeAccount.city ?? '',
+    address: activeAccount.address ?? '',
+    avatarTheme: activeAccount.avatarTheme ?? 'aqua',
+  };
+}
+
+export function updateCustomerProfile(draft: CustomerProfileDraft): { ok: true } | { ok: false; error: string } {
+  if (!activeAccount || activeAccount.role !== 'customer') {
+    return { ok: false, error: 'Please log in with a customer account first.' };
+  }
+  const phone = normalizePhone(draft.phone);
+  if (!validPhone(phone)) return { ok: false, error: 'Invalid mobile number.' };
+  const otherAccount = accounts.find(account => account.phone === phone && account !== activeAccount);
+  if (otherAccount) return { ok: false, error: 'This mobile number is used by another demo account.' };
+  activeAccount.fullName = draft.fullName.trim().replace(/\s+/g, ' ');
+  activeAccount.phone = phone;
+  activeAccount.email = draft.email.trim().toLowerCase();
+  activeAccount.city = draft.city.trim().replace(/\s+/g, ' ');
+  activeAccount.address = draft.address.trim().replace(/\s+/g, ' ');
+  activeAccount.avatarTheme = draft.avatarTheme;
+  return { ok: true };
 }
