@@ -13,7 +13,7 @@ export default function LoginScreen() {
     setError('');
     const account=login(normalizePhone(phone),password);
     if(!account) return setError('Invalid demo phone number or password. Please try again.');
-    router.replace('/home');
+    router.replace(account.role === 'customer' ? '/customer/home' : '/home');
   };
   const useDemo=()=>{setPhone('0771234567');setPassword('FishMate123');setError('');};
   return <AuthShell eyebrow="Welcome back" title="Log in to FishMate" subtitle="Your marketplace, your fishing community. Let's get you connected." backTo="/welcome">

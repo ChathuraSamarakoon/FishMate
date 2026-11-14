@@ -97,3 +97,9 @@ The changed TypeScript/TSX transpiles without syntax errors; the three PNG strip
 ## Authentication + 4-digit OTP update (Nov 2026)
 
 The previous Login/Register placeholders have been replaced with fully designed forms and an animated four-digit OTP verification flow. See **`AUTH-OTP-IMPLEMENTATION.md`** for screen list, demo credentials, OTP code, flow instructions, scope/security notes and test limitations.
+
+---
+
+## Customer Marketplace Screens (C01–C04)
+
+The Customer Home, Search & Filter, Fish Listing Details and Fisherman Profile routes have been added. See [CUSTOMER-C01-C04-IMPLEMENTATION.md](CUSTOMER-C01-C04-IMPLEMENTATION.md) for features, test credentials, demo-only limitations and animation details.
