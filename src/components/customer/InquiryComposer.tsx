@@ -8,14 +8,14 @@ type Props = { sellerId: string; listingId?: string; visible: boolean; onClose: 
 
 /** An interactive draft only: it never contacts the seller or sends a real message. */
 export function InquiryComposer({ sellerId, listingId, visible, onClose }: Props) {
-  const { saveDemoInquiry } = useMarketplace();
+  const { createInquiry } = useMarketplace();
   const seller = getFishermanById(sellerId);
   const listing = listingId ? getListingById(listingId) : undefined;
   const [text, setText] = useState('');
   useEffect(() => { if (visible) setText(listing ? `Hi, is ${listing.name} still available?` : 'Hi, I would like to know more about your available fish.'); }, [visible, listing?.id]);
   const save = () => {
     if (!text.trim()) { Alert.alert('Message required', 'Please enter an inquiry message.'); return; }
-    saveDemoInquiry(sellerId, text.trim(), listingId);
+    createInquiry({ sellerId, message: text.trim(), listingId });
     onClose();
     Alert.alert('Saved in demo', 'This inquiry is saved locally in the prototype. No message has been sent to a fisherman.');
   };
