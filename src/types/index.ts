@@ -31,6 +31,9 @@ export type FishListing = {
   image: ImageSourcePropType;
   sellerId: string;
   tags: string[];
+  galleryImages?: ImageSourcePropType[];
+  listingDate?: string;
+  sellingLocation?: string;
 };
 
 export type FishermanProfile = {
@@ -90,16 +93,25 @@ export type FishermanOrder = {
   note?: string;
 };
 
+export type FishermanInquiryStatus = 'new' | 'responded' | 'closed';
+
 export type FishermanInquiryItem = {
   id: string;
   customerName: string;
   customerPhone?: string;
+  customerLocation?: string;
   listingId?: string;
   listingName?: string;
+  requestedQuantityKg?: number;
   message: string;
   timeAgo: string;
+  receivedDate?: string;
   unread: boolean;
   replied: boolean;
+  status?: FishermanInquiryStatus;
+  replyMessage?: string;
+  repliedAt?: string;
+  closedAt?: string;
 };
 
 export type FishingTrip = {
@@ -114,6 +126,11 @@ export type FishingTrip = {
   iceBaitCost: number;
   otherCost: number;
   status: 'completed' | 'ongoing' | 'planned';
+  revenue?: number;
+  profit?: number;
+  nauticalMiles?: number;
+  targetSpecies?: string[];
+  crewCount?: number;
 };
 
 export type FishermanActivity = {

@@ -22,6 +22,7 @@ export default function FishermanLayout() {
     'a07',
     's07',
     's08',
+    's10',
   ].includes(segment);
 
   return (
@@ -44,6 +45,7 @@ export default function FishermanLayout() {
           <Stack.Screen name="s12" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s22" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s09" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s10" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s21" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s03" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s04" options={{ animation: 'slide_from_right' }} />

@@ -4,6 +4,7 @@ import type {
   FishermanActivity,
   FishermanDashboardSummary,
   FishermanInquiryItem,
+  FishermanInquiryStatus,
   FishermanOrder,
   FishermanOrderStatus,
   FishermanProfile,
@@ -34,6 +35,8 @@ type FishermanContextType = {
   addTrip: (newTrip: FishingTrip) => void;
   updateOrderStatus: (orderId: string, nextStatus?: FishermanOrderStatus) => void;
   replyInquiry: (inquiryId: string, replyText: string) => void;
+  closeInquiry: (inquiryId: string) => void;
+  updateInquiryStatus: (inquiryId: string, status: FishermanInquiryStatus) => void;
   clearOrders: () => void;
   clearInquiries: () => void;
   resetDemoData: () => void;
@@ -183,7 +186,61 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
           badge: 'Replied',
         };
         setActivities((actPrev) => [activity, ...actPrev]);
-        return { ...inq, unread: false, replied: true };
+        return {
+          ...inq,
+          unread: false,
+          replied: true,
+          status: 'responded',
+          replyMessage: replyText,
+          repliedAt: 'Just now',
+        };
+      }),
+    );
+  };
+
+  const closeInquiry = (inquiryId: string) => {
+    setInquiries((prev) =>
+      prev.map((inq) => {
+        if (inq.id !== inquiryId) return inq;
+        const activity: FishermanActivity = {
+          id: `act-${Date.now()}-${inq.id}`,
+          type: 'inquiry',
+          title: `Inquiry with ${inq.customerName} Closed`,
+          description: inq.listingName ? `Regarding ${inq.listingName}` : 'Inquiry resolved',
+          timeAgo: 'Just now',
+          badge: 'Closed',
+        };
+        setActivities((actPrev) => [activity, ...actPrev]);
+        return { ...inq, unread: false, status: 'closed', closedAt: 'Just now' };
+      }),
+    );
+  };
+
+  const updateInquiryStatus = (inquiryId: string, nextStatus: FishermanInquiryStatus) => {
+    setInquiries((prev) =>
+      prev.map((inq) => {
+        if (inq.id !== inquiryId) return inq;
+        const isResponded = nextStatus === 'responded';
+        const isClosed = nextStatus === 'closed';
+        const isNew = nextStatus === 'new';
+
+        const activity: FishermanActivity = {
+          id: `act-${Date.now()}-${inq.id}`,
+          type: 'inquiry',
+          title: `Inquiry with ${inq.customerName} set to ${nextStatus.toUpperCase()}`,
+          description: inq.listingName ? `Catch: ${inq.listingName}` : 'Inquiry status updated',
+          timeAgo: 'Just now',
+          badge: isNew ? 'New' : isResponded ? 'Replied' : 'Closed',
+        };
+        setActivities((actPrev) => [activity, ...actPrev]);
+
+        return {
+          ...inq,
+          status: nextStatus,
+          unread: isNew,
+          replied: isResponded,
+          closedAt: isClosed ? 'Just now' : inq.closedAt,
+        };
       }),
     );
   };
@@ -250,6 +307,8 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     addTrip,
     updateOrderStatus,
     replyInquiry,
+    closeInquiry,
+    updateInquiryStatus,
     clearOrders,
     clearInquiries,
     resetDemoData,

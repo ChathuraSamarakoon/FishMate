@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import {
-  Alert,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,477 +7,809 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { router } from 'expo-router';
 import { FishermanShell } from '@/components/fisherman/FishermanShell';
 import { FishermanIcon } from '@/components/fisherman/FishermanIcon';
-import { EmptyStateCard, RecentInquiryCard, SectionHeader } from '@/components/fisherman/atoms';
+import { EmptyStateCard, SectionHeader } from '@/components/fisherman/atoms';
 import { fishermanUi as ui } from '@/components/fisherman/theme';
 import { useFisherman } from '@/components/fisherman/FishermanContext';
-import type { FishermanInquiryItem } from '@/types';
+import type { FishermanInquiryItem, FishermanInquiryStatus } from '@/types';
 
-const TEMPLATE_REPLIES = [
-  'Yes, landed this morning from Sagara Rani II. Fresh and chilled on ice!',
-  'We can clean, gut, and slice into 1kg steak packs before delivery.',
-  'Doorstep ice-box delivery is available within 15km of Negombo harbor.',
-  'Will arrive with the dawn boat at 05:00 AM. I will reserve your catch.',
-];
+type FilterType = 'all' | 'new' | 'responded' | 'closed';
 
 export default function S09InquiriesScreen() {
-  const { inquiries, replyInquiry } = useFisherman();
-  const [filter, setFilter] = useState<'all' | 'unread' | 'replied'>('all');
-  const [activeInquiry, setActiveInquiry] = useState<FishermanInquiryItem | null>(null);
-  const [replyText, setReplyText] = useState('');
+  const { inquiries } = useFisherman();
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
+  // 01. RESOLVE INQUIRY STATUS (Exact statuses proposed UI decision)
+  const getInquiryStatus = (item: FishermanInquiryItem): FishermanInquiryStatus => {
+    if (item.status) return item.status;
+    if (item.unread) return 'new';
+    if (item.replied) return 'responded';
+    return 'new';
+  };
+
+  // Filter inquiries based on active tab and search query
   const filteredInquiries = inquiries.filter((inq) => {
-    if (filter === 'unread') return inq.unread;
-    if (filter === 'replied') return inq.replied;
-    return true;
+    const status = getInquiryStatus(inq);
+    const matchesFilter = filter === 'all' || status === filter;
+    const matchesSearch =
+      searchQuery.trim() === '' ||
+      inq.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (inq.listingName && inq.listingName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      inq.message.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
-  const unreadCount = inquiries.filter((i) => i.unread).length;
+  // Calculate status counts
+  const totalCount = inquiries.length;
+  const newCount = inquiries.filter((i) => getInquiryStatus(i) === 'new').length;
+  const respondedCount = inquiries.filter((i) => getInquiryStatus(i) === 'responded').length;
+  const closedCount = inquiries.filter((i) => getInquiryStatus(i) === 'closed').length;
 
-  const handleOpenReply = (inquiry: FishermanInquiryItem) => {
-    setActiveInquiry(inquiry);
-    setReplyText(`Hi ${inquiry.customerName.split(' ')[0]}, `);
-  };
-
-  const handleSendReply = () => {
-    if (!replyText.trim() || !activeInquiry) return;
-    const targetId = activeInquiry.id;
-    const targetName = activeInquiry.customerName;
-
-    replyInquiry(targetId, replyText);
-    setActiveInquiry(null);
-    Alert.alert(
-      'Reply Sent! (S09)',
-      `Your message has been sent to ${targetName}. Dashboard unread count and live activity have been updated.`,
-    );
-  };
-
-  const handleCall = (inquiry: FishermanInquiryItem) => {
-    Alert.alert(
-      'Dial Customer (S09)',
-      `Connecting phone call to ${inquiry.customerName} (${inquiry.customerPhone ?? 'Customer'})...`,
-      [
-        { text: 'Call Now', onPress: () => Alert.alert('Dialing...') },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
+  // 02. TAP INQUIRY -> S10 INQUIRY DETAILS
+  const handleOpenInquiryDetails = (inquiry: FishermanInquiryItem) => {
+    router.push({
+      pathname: '/fisherman/s10',
+      params: { id: inquiry.id },
+    } as never);
   };
 
   return (
     <FishermanShell
       title="S09 · Buyer Inquiries"
-      subtitle="Direct questions from seafood buyers"
+      subtitle="Direct questions & catch inquiries"
       back
       rightIcon="message"
       rightLabel="Inquiries"
     >
-      <View style={styles.badgeRow}>
+      {/* SCREEN BREADCRUMB */}
+      <View style={styles.breadcrumbRow}>
         <View style={styles.screenTag}>
           <Text style={styles.screenTagText}>SCREEN S09</Text>
         </View>
-        <Text style={styles.helperText}>Buyer questions, cuts, delivery & custom pricing</Text>
+        <Text numberOfLines={1} style={styles.breadcrumbText}>
+          Buyer communication, catch inquiries & custom requests
+        </Text>
       </View>
 
-      {/* OVERVIEW BANNER */}
-      <View style={styles.bannerCard}>
-        <View style={styles.bannerRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.bannerEyebrow}>CUSTOMER INBOX</Text>
-            <Text style={styles.bannerTitle}>{inquiries.length} Total Inquiries</Text>
-            <Text style={styles.bannerSub}>
-              Prompt replies directly boost customer loyalty and repeat harbor pre-orders.
+      {/* OVERVIEW STATS BANNER */}
+      <View style={styles.overviewCard}>
+        <View style={styles.overviewRow}>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={styles.overviewEyebrow}>CUSTOMER INBOX</Text>
+            <Text style={styles.overviewTitle}>{totalCount} Total Inquiries</Text>
+            <Text style={styles.overviewSub}>
+              Fast replies increase harbor sales by 35% and build buyer trust.
             </Text>
           </View>
-          <View style={styles.unreadPill}>
-            <Text style={styles.unreadPillText}>{unreadCount} Unread</Text>
+          <View style={styles.newBadgePill}>
+            <View style={styles.newGlowDot} />
+            <Text style={styles.newBadgePillText}>{newCount} New</Text>
           </View>
         </View>
       </View>
 
-      {/* FILTER BUTTONS */}
-      <View style={styles.filterRow}>
+      {/* SEARCH BAR */}
+      <View style={styles.searchContainer}>
+        <FishermanIcon name="search" size={16} color={ui.muted} />
+        <TextInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by customer, fish species, or question..."
+          placeholderTextColor={ui.mutedLight}
+          style={styles.searchInput}
+        />
+        {searchQuery.length > 0 ? (
+          <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+            <Text style={styles.clearSearchText}>✕</Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {/* 01. ALL / NEW / RESPONDED / CLOSED FILTERS */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterScroll}
+      >
         <Pressable
-          accessibilityRole="button"
+          accessibilityRole="tab"
+          accessibilityState={{ selected: filter === 'all' }}
           onPress={() => setFilter('all')}
           style={[styles.filterChip, filter === 'all' && styles.filterChipActive]}
         >
           <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
-            All Inquiries ({inquiries.length})
+            All
           </Text>
+          <View
+            style={[
+              styles.filterBadge,
+              filter === 'all' && styles.filterBadgeActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.filterBadgeText,
+                filter === 'all' && styles.filterBadgeTextActive,
+              ]}
+            >
+              {totalCount}
+            </Text>
+          </View>
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => setFilter('unread')}
-          style={[styles.filterChip, filter === 'unread' && styles.filterChipActive]}
-        >
-          <Text style={[styles.filterText, filter === 'unread' && styles.filterTextActive]}>
-            Unread ({unreadCount})
-          </Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => setFilter('replied')}
-          style={[styles.filterChip, filter === 'replied' && styles.filterChipActive]}
-        >
-          <Text style={[styles.filterText, filter === 'replied' && styles.filterTextActive]}>
-            Replied ({inquiries.filter((i) => i.replied).length})
-          </Text>
-        </Pressable>
-      </View>
 
+        <Pressable
+          accessibilityRole="tab"
+          accessibilityState={{ selected: filter === 'new' }}
+          onPress={() => setFilter('new')}
+          style={[styles.filterChip, filter === 'new' && styles.filterChipActive]}
+        >
+          <Text style={[styles.filterText, filter === 'new' && styles.filterTextActive]}>
+            New
+          </Text>
+          <View
+            style={[
+              styles.filterBadge,
+              filter === 'new' && styles.filterBadgeActiveNew,
+            ]}
+          >
+            <Text
+              style={[
+                styles.filterBadgeText,
+                filter === 'new' && styles.filterBadgeTextActiveNew,
+              ]}
+            >
+              {newCount}
+            </Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="tab"
+          accessibilityState={{ selected: filter === 'responded' }}
+          onPress={() => setFilter('responded')}
+          style={[styles.filterChip, filter === 'responded' && styles.filterChipActive]}
+        >
+          <Text style={[styles.filterText, filter === 'responded' && styles.filterTextActive]}>
+            Responded
+          </Text>
+          <View
+            style={[
+              styles.filterBadge,
+              filter === 'responded' && styles.filterBadgeActiveResponded,
+            ]}
+          >
+            <Text
+              style={[
+                styles.filterBadgeText,
+                filter === 'responded' && styles.filterBadgeTextActiveResponded,
+              ]}
+            >
+              {respondedCount}
+            </Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="tab"
+          accessibilityState={{ selected: filter === 'closed' }}
+          onPress={() => setFilter('closed')}
+          style={[styles.filterChip, filter === 'closed' && styles.filterChipActive]}
+        >
+          <Text style={[styles.filterText, filter === 'closed' && styles.filterTextActive]}>
+            Closed
+          </Text>
+          <View
+            style={[
+              styles.filterBadge,
+              filter === 'closed' && styles.filterBadgeActiveClosed,
+            ]}
+          >
+            <Text
+              style={[
+                styles.filterBadgeText,
+                filter === 'closed' && styles.filterBadgeTextActiveClosed,
+              ]}
+            >
+              {closedCount}
+            </Text>
+          </View>
+        </Pressable>
+      </ScrollView>
+
+      {/* SECTION HEADER */}
       <SectionHeader
         title={
           filter === 'all'
-            ? 'Recent Buyer Messages'
-            : filter === 'unread'
-            ? 'Unread Inquiries'
-            : 'Replied Conversations'
+            ? 'All Customer Inquiries'
+            : filter === 'new'
+            ? 'New & Unread Inquiries'
+            : filter === 'responded'
+            ? 'Responded Conversations'
+            : 'Closed / Resolved Inquiries'
         }
-        subtitle="Tap to view inquiry details, send custom quote or telephone"
+        subtitle="Tap any inquiry to open full conversation details (S10)"
         count={filteredInquiries.length}
       />
 
+      {/* 03. EMPTY STATE */}
       {filteredInquiries.length === 0 ? (
         <EmptyStateCard
           icon="message"
-          title="No inquiries found"
-          description="No customer inquiries match this filter. When buyers ask questions, they will show here."
-          actionText="Show All Inquiries"
-          onAction={() => setFilter('all')}
+          title={
+            searchQuery
+              ? `No inquiries matching "${searchQuery}"`
+              : filter === 'new'
+              ? 'No New Inquiries'
+              : filter === 'responded'
+              ? 'No Responded Inquiries'
+              : filter === 'closed'
+              ? 'No Closed Inquiries'
+              : 'No Customer Inquiries'
+          }
+          description={
+            searchQuery
+              ? 'Try searching with another keyword like a fish species or customer name.'
+              : filter === 'new'
+              ? "All customer questions have been answered. You're completely caught up!"
+              : filter === 'responded'
+              ? 'Inquiries you have replied to will appear under this filter.'
+              : filter === 'closed'
+              ? 'Resolved inquiries or fulfilled requests marked as closed will be archived here.'
+              : 'When buyers message you from the FishMate app, their questions will show here.'
+          }
+          actionText={filter !== 'all' || searchQuery ? 'View All Inquiries' : undefined}
+          onAction={() => {
+            setFilter('all');
+            setSearchQuery('');
+          }}
         />
       ) : (
-        filteredInquiries.map((inquiry) => (
-          <RecentInquiryCard
-            key={inquiry.id}
-            inquiry={inquiry}
-            onPress={() => handleOpenReply(inquiry)}
-            onReply={() => handleOpenReply(inquiry)}
-          />
-        ))
-      )}
+        /* 01 & 02. INQUIRY CARDS LIST */
+        filteredInquiries.map((inquiry) => {
+          const status = getInquiryStatus(inquiry);
+          const isNew = status === 'new';
+          const isResponded = status === 'responded';
+          const isClosed = status === 'closed';
 
-      {/* INTERACTIVE REPLY MODAL */}
-      <Modal
-        visible={!!activeInquiry}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setActiveInquiry(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.sheetHandle} />
+          // Extract customer initials
+          const nameParts = inquiry.customerName.split(' ');
+          const initials =
+            nameParts.length >= 2
+              ? `${nameParts[0][0]}${nameParts[1][0]}`
+              : nameParts[0].slice(0, 2).toUpperCase();
 
-            <View style={styles.sheetHeader}>
-              <View>
-                <Text style={styles.sheetEyebrow}>S09 · REPLY TO INQUIRY</Text>
-                <Text style={styles.sheetTitle}>{activeInquiry?.customerName}</Text>
-                <Text style={styles.sheetFish}>
-                  Fish: {activeInquiry?.listingName ?? 'Daily Catch'} · {activeInquiry?.timeAgo}
+          return (
+            <Pressable
+              key={inquiry.id}
+              accessibilityRole="button"
+              accessibilityLabel={`Inquiry from ${inquiry.customerName}`}
+              onPress={() => handleOpenInquiryDetails(inquiry)}
+              style={[
+                styles.inquiryCard,
+                isNew && styles.inquiryCardNew,
+                isClosed && styles.inquiryCardClosed,
+              ]}
+            >
+              {/* TOP ROW: CUSTOMER NAME, RECEIVED DATE & STATUS BADGE */}
+              <View style={styles.cardHeaderRow}>
+                {/* CUSTOMER AVATAR INITIALS */}
+                <View
+                  style={[
+                    styles.avatarInitialsBox,
+                    isNew ? styles.avatarNew : isResponded ? styles.avatarResponded : styles.avatarClosed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.avatarInitialsText,
+                      isNew ? styles.avatarTextNew : isResponded ? styles.avatarTextResponded : styles.avatarTextClosed,
+                    ]}
+                  >
+                    {initials}
+                  </Text>
+                </View>
+
+                {/* CUSTOMER NAME & RECEIVED DATE */}
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <View style={styles.nameRow}>
+                    <Text numberOfLines={1} style={styles.customerName}>
+                      {inquiry.customerName}
+                    </Text>
+                    {isNew ? <View style={styles.unreadGlowDot} /> : null}
+                  </View>
+                  <View style={styles.receivedDateRow}>
+                    <FishermanIcon name="clock" size={11} color={ui.muted} />
+                    <Text style={styles.receivedDateText}>
+                      {inquiry.receivedDate || inquiry.timeAgo}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* 01 & 03. STATUS BADGE (EXACT STATUSES PROPOSED UI DECISION) */}
+                <View
+                  style={[
+                    styles.statusBadge,
+                    isNew
+                      ? styles.statusBadgeNew
+                      : isResponded
+                      ? styles.statusBadgeResponded
+                      : styles.statusBadgeClosed,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      isNew
+                        ? styles.dotNew
+                        : isResponded
+                        ? styles.dotResponded
+                        : styles.dotClosed,
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      isNew
+                        ? styles.statusTextNew
+                        : isResponded
+                        ? styles.statusTextResponded
+                        : styles.statusTextClosed,
+                    ]}
+                  >
+                    {isNew ? 'NEW' : isResponded ? 'RESPONDED' : 'CLOSED'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* 01. RELATED FISH LISTING CHIP */}
+              <View style={styles.fishChipRow}>
+                <View style={styles.fishChip}>
+                  <Text style={styles.fishChipIcon}>🐟</Text>
+                  <Text numberOfLines={1} style={styles.fishChipText}>
+                    {inquiry.listingName || 'Fresh Harbor Catch'}
+                  </Text>
+                </View>
+                {inquiry.customerPhone ? (
+                  <View style={styles.phoneChip}>
+                    <FishermanIcon name="phone" size={10} color={ui.tealDark} />
+                    <Text style={styles.phoneChipText}>{inquiry.customerPhone}</Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {/* 01. MESSAGE PREVIEW */}
+              <View style={styles.messageBox}>
+                <Text numberOfLines={2} style={styles.messagePreviewText}>
+                  &ldquo;{inquiry.message}&rdquo;
                 </Text>
               </View>
-              <Pressable onPress={() => setActiveInquiry(null)} style={styles.closeBtn}>
-                <Text style={styles.closeBtnText}>✕</Text>
-              </Pressable>
-            </View>
 
-            <View style={styles.buyerMessageBox}>
-              <Text style={styles.buyerMessageLabel}>Customer Question:</Text>
-              <Text style={styles.buyerMessageText}>&ldquo;{activeInquiry?.message}&rdquo;</Text>
-            </View>
-
-            <Text style={styles.quickTemplateLabel}>Quick One-Tap Templates:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.templateScroll}
-            >
-              {TEMPLATE_REPLIES.map((tmpl, idx) => (
-                <Pressable
-                  key={idx}
-                  onPress={() => setReplyText((prev) => `${prev} ${tmpl}`.trim())}
-                  style={styles.templateChip}
-                >
-                  <Text numberOfLines={1} style={styles.templateText}>
-                    + {tmpl}
+              {/* REPLY SUMMARY IF RESPONDED */}
+              {inquiry.replyMessage ? (
+                <View style={styles.replyPreviewBox}>
+                  <FishermanIcon name="check" size={11} color={ui.success} />
+                  <Text numberOfLines={1} style={styles.replyPreviewText}>
+                    You: {inquiry.replyMessage}
                   </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
+                </View>
+              ) : null}
 
-            <TextInput
-              value={replyText}
-              onChangeText={setReplyText}
-              multiline
-              numberOfLines={3}
-              placeholder="Type your response to the buyer..."
-              placeholderTextColor={ui.mutedLight}
-              style={styles.replyInput}
-            />
-
-            <View style={styles.modalActionRow}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => {
-                  if (activeInquiry) handleCall(activeInquiry);
-                }}
-                style={styles.callBuyerBtn}
-              >
-                <FishermanIcon name="phone" size={15} color={ui.navy} />
-                <Text style={styles.callBuyerBtnText}>Call</Text>
-              </Pressable>
-
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleSendReply}
-                style={styles.sendReplyBtn}
-              >
-                <FishermanIcon name="message" size={15} color="#FFFFFF" />
-                <Text style={styles.sendReplyBtnText}>Send Reply (S09)</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+              {/* CARD FOOTER: TAP TO VIEW INQUIRY DETAILS (S10) */}
+              <View style={styles.cardFooter}>
+                <Text style={styles.tapActionText}>
+                  {isNew ? 'Reply to inquiry →' : 'View conversation history (S10) →'}
+                </Text>
+                <FishermanIcon name="chevron-right" size={14} color={ui.tealDark} />
+              </View>
+            </Pressable>
+          );
+        })
+      )}
     </FishermanShell>
   );
 }
 
 const styles = StyleSheet.create({
-  badgeRow: {
+  breadcrumbRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginBottom: 12,
   },
   screenTag: {
-    backgroundColor: ui.tealDark,
+    backgroundColor: ui.tealLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
   },
   screenTagText: {
-    color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 1,
+    color: ui.tealDark,
+    letterSpacing: 0.8,
   },
-  helperText: {
+  breadcrumbText: {
     fontSize: 11,
     color: ui.muted,
+    flex: 1,
   },
-  bannerCard: {
+
+  // OVERVIEW CARD
+  overviewCard: {
     backgroundColor: ui.surface,
+    borderRadius: 22,
     padding: 16,
-    borderRadius: 20,
     borderWidth: 1,
     borderColor: ui.border,
+    marginBottom: 14,
+    shadowColor: ui.shadow,
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  bannerRow: {
+  overviewRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
   },
-  bannerEyebrow: {
+  overviewEyebrow: {
     fontSize: 9,
     fontWeight: '900',
-    letterSpacing: 1.5,
     color: ui.tealDark,
+    letterSpacing: 1.2,
   },
-  bannerTitle: {
-    fontSize: 20,
+  overviewTitle: {
+    fontSize: 22,
     fontWeight: '900',
     color: ui.navy,
     marginTop: 2,
   },
-  bannerSub: {
+  overviewSub: {
     fontSize: 11,
     color: ui.muted,
-    lineHeight: 16,
-    marginTop: 3,
+    marginTop: 2,
+    lineHeight: 15,
   },
-  unreadPill: {
-    backgroundColor: '#EBF4FF',
-    paddingHorizontal: 12,
+  newBadgePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#E0F2FE',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    paddingHorizontal: 11,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 14,
   },
-  unreadPillText: {
+  newGlowDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#0284C7',
+  },
+  newBadgePillText: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#2563EB',
+    color: '#0369A1',
   },
-  filterRow: {
+
+  // SEARCH BAR
+  searchContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: ui.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: ui.border,
+    paddingHorizontal: 14,
+    height: 46,
+    marginBottom: 14,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 12,
+    color: ui.navy,
+    fontWeight: '600',
+  },
+  clearSearchText: {
+    fontSize: 14,
+    color: ui.muted,
+    fontWeight: '900',
+  },
+
+  // FILTER TABS
+  filterScroll: {
     gap: 8,
-    marginTop: 12,
+    paddingBottom: 4,
+    marginBottom: 10,
   },
   filterChip: {
-    backgroundColor: ui.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     borderRadius: 14,
+    backgroundColor: ui.surface,
     borderWidth: 1,
     borderColor: ui.border,
   },
   filterChipActive: {
-    backgroundColor: ui.teal,
-    borderColor: ui.teal,
+    backgroundColor: ui.tealDark,
+    borderColor: ui.tealDark,
   },
   filterText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
-    color: ui.navy,
+    color: ui.muted,
   },
   filterTextActive: {
     color: '#FFFFFF',
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(8, 27, 42, 0.45)',
+  filterBadge: {
+    backgroundColor: '#EBF4F6',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
-  modalSheet: {
+  filterBadgeActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  filterBadgeActiveNew: {
+    backgroundColor: '#0284C7',
+  },
+  filterBadgeActiveResponded: {
+    backgroundColor: '#059669',
+  },
+  filterBadgeActiveClosed: {
+    backgroundColor: '#64748B',
+  },
+  filterBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: ui.navy,
+  },
+  filterBadgeTextActive: {
+    color: '#FFFFFF',
+  },
+  filterBadgeTextActiveNew: {
+    color: '#FFFFFF',
+  },
+  filterBadgeTextActiveResponded: {
+    color: '#FFFFFF',
+  },
+  filterBadgeTextActiveClosed: {
+    color: '#FFFFFF',
+  },
+
+  // INQUIRY CARDS
+  inquiryCard: {
     backgroundColor: ui.surface,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 34,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: ui.border,
+    marginBottom: 12,
+    shadowColor: ui.shadow,
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  sheetHandle: {
-    width: 42,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: '#D6E7E5',
-    alignSelf: 'center',
-    marginBottom: 16,
+  inquiryCardNew: {
+    borderColor: '#7DD3FC',
+    backgroundColor: '#FAFDFE',
   },
-  sheetHeader: {
+  inquiryCardClosed: {
+    opacity: 0.85,
+    backgroundColor: '#FAFCFC',
+  },
+  cardHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    gap: 12,
   },
-  sheetEyebrow: {
+  avatarInitialsBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarNew: {
+    backgroundColor: '#E0F2FE',
+  },
+  avatarResponded: {
+    backgroundColor: '#ECFDF5',
+  },
+  avatarClosed: {
+    backgroundColor: '#F1F5F9',
+  },
+  avatarInitialsText: {
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  avatarTextNew: {
+    color: '#0284C7',
+  },
+  avatarTextResponded: {
+    color: '#059669',
+  },
+  avatarTextClosed: {
+    color: '#64748B',
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  customerName: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: ui.navy,
+  },
+  unreadGlowDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#0284C7',
+  },
+  receivedDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  receivedDateText: {
+    fontSize: 10,
+    color: ui.muted,
+    fontWeight: '600',
+  },
+
+  // 01 & 03. STATUS BADGE STYLES
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  statusBadgeNew: {
+    backgroundColor: '#E0F2FE',
+    borderColor: '#BAE6FD',
+  },
+  statusBadgeResponded: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+  },
+  statusBadgeClosed: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  dotNew: {
+    backgroundColor: '#0284C7',
+  },
+  dotResponded: {
+    backgroundColor: '#059669',
+  },
+  dotClosed: {
+    backgroundColor: '#64748B',
+  },
+  statusBadgeText: {
     fontSize: 9,
     fontWeight: '900',
-    letterSpacing: 1.5,
-    color: ui.tealDark,
+    letterSpacing: 0.6,
   },
-  sheetTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: ui.navy,
-    marginTop: 2,
+  statusTextNew: {
+    color: '#0369A1',
   },
-  sheetFish: {
-    fontSize: 11,
-    color: ui.muted,
-    marginTop: 2,
+  statusTextResponded: {
+    color: '#065F46',
   },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: ui.bg,
+  statusTextClosed: {
+    color: '#475569',
+  },
+
+  // FISH CHIP & PHONE
+  fishChipRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: ui.muted,
-  },
-  buyerMessageBox: {
-    backgroundColor: ui.softBlue,
-    padding: 12,
-    borderRadius: 14,
-    marginTop: 14,
-  },
-  buyerMessageLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: ui.tealDark,
-    marginBottom: 4,
-  },
-  buyerMessageText: {
-    fontSize: 12,
-    color: ui.navy,
-    lineHeight: 18,
-    fontStyle: 'italic',
-  },
-  quickTemplateLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: ui.muted,
-    marginTop: 14,
-    marginBottom: 6,
-  },
-  templateScroll: {
     gap: 8,
-    paddingBottom: 4,
-  },
-  templateChip: {
-    backgroundColor: ui.bg,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: ui.border,
-    maxWidth: 260,
-  },
-  templateText: {
-    fontSize: 11,
-    color: ui.navy,
-    fontWeight: '700',
-  },
-  replyInput: {
-    backgroundColor: ui.bg,
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: ui.border,
-    fontSize: 13,
-    color: ui.navy,
-    minHeight: 84,
-    textAlignVertical: 'top',
     marginTop: 12,
   },
-  modalActionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 14,
-  },
-  callBuyerBtn: {
+  fishChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: ui.softBlue,
-    paddingHorizontal: 16,
-    height: 48,
-    borderRadius: 14,
+    gap: 5,
+    backgroundColor: '#F0F9FA',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: ui.border,
+    borderColor: '#D4EEF2',
   },
-  callBuyerBtnText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: ui.navy,
+  fishChipIcon: {
+    fontSize: 11,
   },
-  sendReplyBtn: {
-    flex: 1,
+  fishChipText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: ui.tealDark,
+  },
+  phoneChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: ui.teal,
-    height: 48,
-    borderRadius: 14,
+    gap: 4,
+    backgroundColor: '#F8FCFD',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-  sendReplyBtnText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#FFFFFF',
+  phoneChipText: {
+    fontSize: 10,
+    color: ui.muted,
+    fontWeight: '600',
+  },
+
+  // MESSAGE PREVIEW
+  messageBox: {
+    backgroundColor: '#F8FCFD',
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#EBF4F6',
+  },
+  messagePreviewText: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: ui.navy,
+    fontWeight: '600',
+    fontStyle: 'italic',
+  },
+
+  // REPLY PREVIEW
+  replyPreviewBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginTop: 8,
+  },
+  replyPreviewText: {
+    fontSize: 10,
+    color: '#065F46',
+    fontWeight: '700',
+    flex: 1,
+  },
+
+  // CARD FOOTER
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F4F6',
+  },
+  tapActionText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: ui.tealDark,
   },
 });
