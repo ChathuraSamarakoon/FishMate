@@ -1,3 +1,7 @@
+## Latest update: Customer Shopping, Checkout & Delivery (C10–C17)
+
+The eight new frontend-only customer screens and connected demo flow are documented in [`CUSTOMER-C10-C17-IMPLEMENTATION.md`](CUSTOMER-C10-C17-IMPLEMENTATION.md). Customer Home now links to Cart and My Orders. Real payments/deliveries are **not** implemented.
+
 # FishMate — Animated Splash Screen & Welcome Frontend
 
 This is **your existing Expo/React Native project** from `1.zip`, upgraded with a FishMate-branded animated launch experience. It uses **Expo SDK 58, Expo Router, TypeScript, and built-in React Native Animated**. No new runtime animation packages or backend are required.
@@ -12,7 +16,7 @@ This is **your existing Expo/React Native project** from `1.zip`, upgraded with 
    - Logo shifts upwards while `Welcome to FishMate` and `Get Started` fade in.
    - The route replaces itself with `/welcome` to avoid an extra Back step.
 2. **`/welcome` — static welcome screen** with continuously moving, layered, subtle waves and a working **Get Started** action.
-3. **`/role-select` — Customer / Fisherman selector**, connected to the existing registration route (which is still a placeholder).
+3. **`/role-select` — Customer / Fisherman selector**, connected to the updated Registration and Login routes.
 4. FishMate icon/wordmark assets cut from your generated logo, plus original three custom seamless flowing-ocean strips, aqua glow, and gradient-button PNGs.
 5. App display name updated to **FishMate** with matching launcher assets.
 
@@ -91,3 +95,29 @@ This preserves your other application pages and logo files. The existing older w
 ### Verification status
 
 The changed TypeScript/TSX transpiles without syntax errors; the three PNG strip edges were verified to match exactly. A 6-second offline wave-motion preview was also rendered. A full Expo device run, dependency-backed typecheck and ESLint were **not verified** here because `npm ci` did not complete in the execution environment. Run `npm ci`, `npm run typecheck` and `npm run lint` on your local development machine.
+
+---
+
+## Authentication + 4-digit OTP update (Nov 2026)
+
+The previous Login/Register placeholders have been replaced with fully designed forms and an animated four-digit OTP verification flow. See **`AUTH-OTP-IMPLEMENTATION.md`** for screen list, demo credentials, OTP code, flow instructions, scope/security notes and test limitations.
+
+---
+
+## Customer Marketplace Screens (C01–C04)
+
+The Customer Home, Search & Filter, Fish Listing Details and Fisherman Profile routes have been added. See [CUSTOMER-C01-C04-IMPLEMENTATION.md](CUSTOMER-C01-C04-IMPLEMENTATION.md) for features, test credentials, demo-only limitations and animation details.
+
+---
+
+## Customer Inquiries C05–C07 (November 2026)
+
+The customer inquiries workflow is now implemented as three dedicated UI routes with local demo state, searchable inquiry history, filters, status badges, and inquiry details. See **`CUSTOMER-C05-C07-IMPLEMENTATION.md`** for routes, demo testing steps and limits. C03 and C04 link directly to C05, and the previously built floating animated bottom navigation remains in use for C06.
+
+---
+
+## Customer profile UI (C08–C09)
+
+The Customer Profile tab now opens **C08 My Profile**, with a fully working frontend-only **C09 Edit Profile** screen.
+
+See [`CUSTOMER-C08-C09-IMPLEMENTATION.md`](./CUSTOMER-C08-C09-IMPLEMENTATION.md) for page details, data validation, route flows and testing steps. Existing animated navigation and C01–C07 screens are preserved.

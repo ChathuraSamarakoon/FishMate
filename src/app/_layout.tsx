@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 export default function RootLayout() {
   return (
     <>
-      <StatusBar style="dark" backgroundColor="#FBFCF8" />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -15,6 +15,14 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ animation: 'none' }} />
         <Stack.Screen name="welcome" options={{ animation: 'none' }} />
         <Stack.Screen name="role-select" options={{ animation: 'fade' }} />
+        <Stack.Screen name="register" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="login" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="otp-verification" options={{ animation: 'fade' }} />
+        <Stack.Screen name="forgot-password" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="reset-password" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="home" options={{ animation: 'fade' }} />
+        <Stack.Screen name="customer" options={{ animation: 'fade' }} />
+        <Stack.Screen name="fisherman" options={{ animation: 'fade' }} />
       </Stack>
     </>
   );
