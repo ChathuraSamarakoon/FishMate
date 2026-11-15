@@ -9,6 +9,9 @@ import type {
   FishermanOrderStatus,
   FishermanProfile,
   FishingTrip,
+  TripCatchRecord,
+  TripExpenseRecord,
+  TripSaleRecord,
 } from '@/types';
 import {
   currentFishermanProfile,
@@ -33,6 +36,10 @@ type FishermanContextType = {
   updateListing: (listingId: string, updates: Partial<FishListing>) => void;
   toggleListingStock: (listingId: string) => void;
   addTrip: (newTrip: FishingTrip) => void;
+  updateTrip: (tripId: string, updates: Partial<FishingTrip>) => void;
+  addTripCatch: (tripId: string, record: TripCatchRecord) => void;
+  addTripExpense: (tripId: string, record: TripExpenseRecord) => void;
+  addTripSale: (tripId: string, record: TripSaleRecord) => void;
   updateOrderStatus: (orderId: string, nextStatus?: FishermanOrderStatus) => void;
   replyInquiry: (inquiryId: string, replyText: string) => void;
   closeInquiry: (inquiryId: string) => void;
@@ -144,6 +151,133 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
       badge: 'Voyage Active',
     };
     setActivities((prev) => [activity, ...prev]);
+  };
+
+  const updateTrip = (tripId: string, updates: Partial<FishingTrip>) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const updated = { ...trip, ...updates };
+
+        const sales = updated.salesList ?? [];
+        const expenses = updated.expensesList ?? [];
+        const calcRevenue = sales.length > 0
+          ? sales.reduce((sum, s) => sum + s.totalAmount, 0)
+          : updated.revenue ?? 0;
+        const calcExpenses = expenses.length > 0
+          ? expenses.reduce((sum, e) => sum + e.amount, 0)
+          : (updated.fuelCost || 0) + (updated.iceBaitCost || 0) + (updated.otherCost || 0);
+        const calcProfit = calcRevenue - calcExpenses;
+
+        return {
+          ...updated,
+          revenue: calcRevenue,
+          profit: calcProfit,
+        };
+      }),
+    );
+  };
+
+  const addTripCatch = (tripId: string, record: TripCatchRecord) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const existingCatches = trip.catches ?? [];
+        const catches = [record, ...existingCatches];
+        const catchVolumeKg = catches.reduce((sum, c) => sum + c.weightKg, 0);
+
+        const activity: FishermanActivity = {
+          id: `act-${Date.now()}-${record.id}`,
+          type: 'trip',
+          title: `Catch logged: ${record.species}`,
+          description: `${record.weightKg} kg (${record.grade ?? 'Standard'}) on ${trip.tripNumber}`,
+          timeAgo: 'Just now',
+          badge: `${record.weightKg} kg`,
+        };
+        setActivities((actPrev) => [activity, ...actPrev]);
+
+        return {
+          ...trip,
+          catches,
+          catchVolumeKg,
+        };
+      }),
+    );
+  };
+
+  const addTripExpense = (tripId: string, record: TripExpenseRecord) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const existingExpenses = trip.expensesList ?? [];
+        const expensesList = [record, ...existingExpenses];
+        const totalExpenses = expensesList.reduce((sum, e) => sum + e.amount, 0);
+
+        let fuelCost = trip.fuelCost;
+        let iceBaitCost = trip.iceBaitCost;
+        let otherCost = trip.otherCost;
+        if (record.category === 'fuel') fuelCost += record.amount;
+        else if (record.category === 'ice' || record.category === 'bait') iceBaitCost += record.amount;
+        else otherCost += record.amount;
+
+        const revenue = trip.salesList && trip.salesList.length > 0
+          ? trip.salesList.reduce((sum, s) => sum + s.totalAmount, 0)
+          : trip.revenue ?? 0;
+        const profit = revenue - totalExpenses;
+
+        const activity: FishermanActivity = {
+          id: `act-${Date.now()}-${record.id}`,
+          type: 'trip',
+          title: `Expense logged: ${record.title}`,
+          description: `Rs. ${record.amount.toLocaleString()} for voyage ${trip.tripNumber}`,
+          timeAgo: 'Just now',
+          badge: `-Rs. ${record.amount.toLocaleString()}`,
+        };
+        setActivities((actPrev) => [activity, ...actPrev]);
+
+        return {
+          ...trip,
+          expensesList,
+          fuelCost,
+          iceBaitCost,
+          otherCost,
+          profit,
+        };
+      }),
+    );
+  };
+
+  const addTripSale = (tripId: string, record: TripSaleRecord) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const existingSales = trip.salesList ?? [];
+        const salesList = [record, ...existingSales];
+        const revenue = salesList.reduce((sum, s) => sum + s.totalAmount, 0);
+
+        const totalExpenses = trip.expensesList && trip.expensesList.length > 0
+          ? trip.expensesList.reduce((sum, e) => sum + e.amount, 0)
+          : (trip.fuelCost || 0) + (trip.iceBaitCost || 0) + (trip.otherCost || 0);
+        const profit = revenue - totalExpenses;
+
+        const activity: FishermanActivity = {
+          id: `act-${Date.now()}-${record.id}`,
+          type: 'order',
+          title: `Sale completed: ${record.buyerName}`,
+          description: `${record.quantityKg} kg ${record.speciesSold} · Rs. ${record.totalAmount.toLocaleString()}`,
+          timeAgo: 'Just now',
+          badge: `+Rs. ${record.totalAmount.toLocaleString()}`,
+        };
+        setActivities((actPrev) => [activity, ...actPrev]);
+
+        return {
+          ...trip,
+          salesList,
+          revenue,
+          profit,
+        };
+      }),
+    );
   };
 
   const updateOrderStatus = (orderId: string, nextStatus?: FishermanOrderStatus) => {
@@ -305,6 +439,10 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     updateListing,
     toggleListingStock,
     addTrip,
+    updateTrip,
+    addTripCatch,
+    addTripExpense,
+    addTripSale,
     updateOrderStatus,
     replyInquiry,
     closeInquiry,

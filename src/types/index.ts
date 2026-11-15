@@ -114,6 +114,37 @@ export type FishermanInquiryItem = {
   closedAt?: string;
 };
 
+export type TripCatchRecord = {
+  id: string;
+  species: string;
+  weightKg: number;
+  grade?: string;
+  storageMethod?: string;
+  recordedAt: string;
+  estimatedValue?: number;
+};
+
+export type TripExpenseRecord = {
+  id: string;
+  category: 'fuel' | 'ice' | 'bait' | 'harbor' | 'food' | 'maintenance' | 'other';
+  title: string;
+  amount: number;
+  receiptNote?: string;
+  recordedAt: string;
+};
+
+export type TripSaleRecord = {
+  id: string;
+  buyerName: string;
+  buyerType: 'wholesale_auction' | 'restaurant' | 'direct_consumer' | 'retail_stall';
+  speciesSold: string;
+  quantityKg: number;
+  pricePerKg: number;
+  totalAmount: number;
+  paymentStatus: 'paid_cash' | 'paid_bank' | 'pending';
+  recordedAt: string;
+};
+
 export type FishingTrip = {
   id: string;
   tripNumber: string;
@@ -131,6 +162,11 @@ export type FishingTrip = {
   nauticalMiles?: number;
   targetSpecies?: string[];
   crewCount?: number;
+  isOvernight?: boolean;
+  tripDate?: string;
+  catches?: TripCatchRecord[];
+  expensesList?: TripExpenseRecord[];
+  salesList?: TripSaleRecord[];
 };
 
 export type FishermanActivity = {

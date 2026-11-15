@@ -34,7 +34,7 @@ export function AnimatedFishermanTabs({ current }: { current: string }) {
       ? 'orders'
       : current === 's06' || current === 's07' || current === 's08'
       ? 'listings'
-      : current === 's12'
+      : current === 's12' || current === 's13'
       ? 'trips'
       : current === 's03' || current === 's04' || current === 'a07'
       ? 'profile'
