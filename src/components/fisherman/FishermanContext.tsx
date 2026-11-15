@@ -47,6 +47,7 @@ type FishermanContextType = {
   updateTripSale: (tripId: string, saleId: string, updates: Partial<TripSaleRecord>) => void;
   deleteTripSale: (tripId: string, saleId: string) => void;
   updateOrderStatus: (orderId: string, nextStatus?: FishermanOrderStatus) => void;
+  updateOrder: (orderId: string, updates: Partial<FishermanOrder>) => void;
   replyInquiry: (inquiryId: string, replyText: string) => void;
   closeInquiry: (inquiryId: string) => void;
   updateInquiryStatus: (inquiryId: string, status: FishermanInquiryStatus) => void;
@@ -474,6 +475,29 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateOrder = (orderId: string, updates: Partial<FishermanOrder>) => {
+    setOrders((prev) =>
+      prev.map((order) => {
+        if (order.id !== orderId) return order;
+        const updated = { ...order, ...updates };
+
+        if (updates.status && updates.status !== order.status) {
+          const activity: FishermanActivity = {
+            id: `act-${Date.now()}-${order.id}`,
+            type: 'order',
+            title: `Order ${order.orderNumber} status: ${updates.status.toUpperCase()}`,
+            description: `Customer ${order.customerName} · Total Rs. ${updated.totalAmount.toLocaleString()}`,
+            timeAgo: 'Just now',
+            badge: updates.status,
+          };
+          setActivities((actPrev) => [activity, ...actPrev]);
+        }
+
+        return updated;
+      }),
+    );
+  };
+
   const replyInquiry = (inquiryId: string, replyText: string) => {
     setInquiries((prev) =>
       prev.map((inq) => {
@@ -617,6 +641,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     updateTripSale,
     deleteTripSale,
     updateOrderStatus,
+    updateOrder,
     replyInquiry,
     closeInquiry,
     updateInquiryStatus,

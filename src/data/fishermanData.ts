@@ -170,6 +170,48 @@ export const defaultFishermanOrders: FishermanOrder[] = [
     createdAt: 'Yesterday',
     deliveryTime: 'Delivered successfully at 04:15 PM',
   },
+  {
+    id: 'ord-06',
+    orderNumber: '#ORD-8825',
+    customerName: 'Chef Ruwan (The Lagoon Grill)',
+    customerPhone: '077 992 4545',
+    customerLocation: 'Lewis Place, Negombo (2.3 km)',
+    items: [
+      {
+        listingId: 'listing-04',
+        fishName: 'King Mackerel (Seer)',
+        quantityKg: 6.0,
+        pricePerKg: 2800,
+        totalPrice: 16800,
+      },
+    ],
+    totalAmount: 16800,
+    status: 'confirmed',
+    createdAt: '25 mins ago',
+    deliveryTime: 'Today by 01:15 PM',
+    note: 'Confirmed reservation. Cut steaks and vacuum seal.',
+  },
+  {
+    id: 'ord-07',
+    orderNumber: '#ORD-8780',
+    customerName: 'Dharshana Samarasekara',
+    customerPhone: '072 119 4400',
+    customerLocation: 'Porutota Rd, Kochchikade (5.5 km)',
+    items: [
+      {
+        listingId: 'listing-05',
+        fishName: 'Blue Crab',
+        quantityKg: 3.0,
+        pricePerKg: 2950,
+        totalPrice: 8850,
+      },
+    ],
+    totalAmount: 8850,
+    status: 'cancelled',
+    createdAt: '2 days ago',
+    deliveryTime: 'Cancelled by customer',
+    note: 'Customer event postponed due to heavy rainfall.',
+  },
 ];
 
 export const defaultFishermanInquiries: FishermanInquiryItem[] = [

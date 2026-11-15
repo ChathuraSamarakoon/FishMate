@@ -30,11 +30,13 @@ const TABS: Tab[] = [
 
 export function AnimatedFishermanTabs({ current }: { current: string }) {
   const normalizedKey =
-    current === 's22' || current === 's09' || current === 's10'
+    current === 's01'
+      ? 'dashboard'
+      : current === 's22' || current === 's23' || current === 's24' || current === 's25' || current === 's09' || current === 's10'
       ? 'orders'
       : current === 's06' || current === 's07' || current === 's08'
       ? 'listings'
-      : current === 's12' || current === 's13'
+      : current === 's12' || current === 's13' || current === 's21'
       ? 'trips'
       : current === 's03' || current === 's04' || current === 'a07'
       ? 'profile'

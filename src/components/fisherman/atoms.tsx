@@ -231,14 +231,17 @@ export function BasicProfitCard({
 }
 
 export function OrderStatusBadge({ status }: { status: FishermanOrderStatus }) {
-  const config = {
-    pending: { label: 'Pending Dispatch', bg: ui.warningSoft, text: ui.warning },
-    preparing: { label: 'Packing & Cleaning', bg: ui.tealLight, text: ui.tealDark },
+  const configMap: Record<FishermanOrderStatus, { label: string; bg: string; text: string }> = {
+    pending: { label: 'Pending', bg: ui.warningSoft, text: ui.warning },
+    confirmed: { label: 'Confirmed', bg: '#E0F2FE', text: '#0284C7' },
+    preparing: { label: 'Preparing', bg: ui.tealLight, text: ui.tealDark },
     ready: { label: 'Ready for Pickup', bg: ui.softBlue, text: ui.navy },
     dispatched: { label: 'Out for Delivery', bg: '#F0EAF8', text: '#6C48B2' },
+    delivered: { label: 'Delivered', bg: ui.successSoft, text: ui.success },
     completed: { label: 'Completed', bg: ui.successSoft, text: ui.success },
     cancelled: { label: 'Cancelled', bg: ui.dangerSoft, text: ui.danger },
-  }[status];
+  };
+  const config = configMap[status] || configMap.pending;
 
   return (
     <View style={[styles.statusBadge, { backgroundColor: config.bg }]}>

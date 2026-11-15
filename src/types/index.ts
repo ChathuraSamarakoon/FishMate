@@ -65,9 +65,11 @@ export type FishermanProfile = {
 
 export type FishermanOrderStatus =
   | 'pending'
+  | 'confirmed'
   | 'preparing'
   | 'ready'
   | 'dispatched'
+  | 'delivered'
   | 'completed'
   | 'cancelled';
 
@@ -91,6 +93,13 @@ export type FishermanOrder = {
   createdAt: string;
   deliveryTime: string;
   note?: string;
+  subtotal?: number;
+  deliveryFee?: number;
+  paymentMethod?: 'cash_on_delivery' | 'bank_transfer' | 'online_card';
+  paymentStatus?: 'paid' | 'pending' | 'refunded';
+  deliveryRiderName?: string;
+  deliveryRiderPhone?: string;
+  rejectionReason?: string;
 };
 
 export type FishermanInquiryStatus = 'new' | 'responded' | 'closed';

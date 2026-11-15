@@ -8,11 +8,15 @@ export default function FishermanLayout() {
   const segment = pathname.split('/').filter(Boolean)[1] ?? 'dashboard';
   const showTabs = [
     'dashboard',
+    's01',
     'orders',
     'listings',
     'trips',
     'profile',
     's22',
+    's23',
+    's24',
+    's25',
     's06',
     's12',
     's09',
@@ -43,6 +47,7 @@ export default function FishermanLayout() {
           }}
         >
           <Stack.Screen name="dashboard" options={{ animation: 'fade' }} />
+          <Stack.Screen name="s01" options={{ animation: 'fade' }} />
           <Stack.Screen name="orders" options={{ animation: 'fade' }} />
           <Stack.Screen name="listings" options={{ animation: 'fade' }} />
           <Stack.Screen name="trips" options={{ animation: 'fade' }} />
@@ -72,8 +77,18 @@ export default function FishermanLayout() {
             }}
           />
           <Stack.Screen name="s19" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="s20" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen
+            name="s20"
+            options={{
+              animation: 'slide_from_bottom',
+              presentation: 'transparentModal',
+              contentStyle: { backgroundColor: 'transparent' },
+            }}
+          />
           <Stack.Screen name="s22" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s23" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s24" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s25" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s09" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s10" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s21" options={{ animation: 'slide_from_right' }} />
