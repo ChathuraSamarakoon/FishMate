@@ -54,7 +54,14 @@ export default function FishermanLayout() {
           <Stack.Screen name="s13" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s14" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s15" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="s16" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen
+            name="s16"
+            options={{
+              animation: 'slide_from_bottom',
+              presentation: 'transparentModal',
+              contentStyle: { backgroundColor: 'transparent' },
+            }}
+          />
           <Stack.Screen name="s17" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s18" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s19" options={{ animation: 'slide_from_right' }} />

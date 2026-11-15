@@ -38,8 +38,14 @@ type FishermanContextType = {
   addTrip: (newTrip: FishingTrip) => void;
   updateTrip: (tripId: string, updates: Partial<FishingTrip>) => void;
   addTripCatch: (tripId: string, record: TripCatchRecord) => void;
+  updateTripCatch: (tripId: string, catchId: string, updates: Partial<TripCatchRecord>) => void;
+  deleteTripCatch: (tripId: string, catchId: string) => void;
   addTripExpense: (tripId: string, record: TripExpenseRecord) => void;
+  updateTripExpense: (tripId: string, expenseId: string, updates: Partial<TripExpenseRecord>) => void;
+  deleteTripExpense: (tripId: string, expenseId: string) => void;
   addTripSale: (tripId: string, record: TripSaleRecord) => void;
+  updateTripSale: (tripId: string, saleId: string, updates: Partial<TripSaleRecord>) => void;
+  deleteTripSale: (tripId: string, saleId: string) => void;
   updateOrderStatus: (orderId: string, nextStatus?: FishermanOrderStatus) => void;
   replyInquiry: (inquiryId: string, replyText: string) => void;
   closeInquiry: (inquiryId: string) => void;
@@ -196,6 +202,38 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
         };
         setActivities((actPrev) => [activity, ...actPrev]);
 
+        return {
+          ...trip,
+          catches,
+          catchVolumeKg,
+        };
+      }),
+    );
+  };
+
+  const updateTripCatch = (tripId: string, catchId: string, updates: Partial<TripCatchRecord>) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const catches = (trip.catches || []).map((c) =>
+          c.id === catchId ? { ...c, ...updates } : c,
+        );
+        const catchVolumeKg = catches.reduce((sum, c) => sum + c.weightKg, 0);
+        return {
+          ...trip,
+          catches,
+          catchVolumeKg,
+        };
+      }),
+    );
+  };
+
+  const deleteTripCatch = (tripId: string, catchId: string) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const catches = (trip.catches || []).filter((c) => c.id !== catchId);
+        const catchVolumeKg = catches.reduce((sum, c) => sum + c.weightKg, 0);
         return {
           ...trip,
           catches,
@@ -441,6 +479,8 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     addTrip,
     updateTrip,
     addTripCatch,
+    updateTripCatch,
+    deleteTripCatch,
     addTripExpense,
     addTripSale,
     updateOrderStatus,
