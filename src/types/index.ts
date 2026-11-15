@@ -143,6 +143,9 @@ export type TripSaleRecord = {
   totalAmount: number;
   paymentStatus: 'paid_cash' | 'paid_bank' | 'pending';
   recordedAt: string;
+  sourceType?: 'harbor_direct' | 'customer_app_order';
+  orderId?: string;
+  orderNumber?: string;
 };
 
 export type FishingTrip = {

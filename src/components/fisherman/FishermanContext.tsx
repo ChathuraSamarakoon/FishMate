@@ -285,6 +285,84 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateTripExpense = (
+    tripId: string,
+    expenseId: string,
+    updates: Partial<TripExpenseRecord>,
+  ) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const expensesList = (trip.expensesList || []).map((e) =>
+          e.id === expenseId ? { ...e, ...updates } : e,
+        );
+        const totalExpenses = expensesList.reduce((sum, e) => sum + e.amount, 0);
+
+        const fuelCost = expensesList
+          .filter((e) => e.category === 'fuel')
+          .reduce((sum, e) => sum + e.amount, 0);
+        const iceBaitCost = expensesList
+          .filter((e) => e.category === 'ice' || e.category === 'bait')
+          .reduce((sum, e) => sum + e.amount, 0);
+        const otherCost = expensesList
+          .filter((e) => e.category !== 'fuel' && e.category !== 'ice' && e.category !== 'bait')
+          .reduce((sum, e) => sum + e.amount, 0);
+
+        const revenue =
+          trip.salesList && trip.salesList.length > 0
+            ? trip.salesList.reduce((sum, s) => sum + s.totalAmount, 0)
+            : trip.revenue ?? 0;
+        const profit = revenue - totalExpenses;
+
+        return {
+          ...trip,
+          expensesList,
+          expenses: totalExpenses,
+          fuelCost,
+          iceBaitCost,
+          otherCost,
+          profit,
+        };
+      }),
+    );
+  };
+
+  const deleteTripExpense = (tripId: string, expenseId: string) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const expensesList = (trip.expensesList || []).filter((e) => e.id !== expenseId);
+        const totalExpenses = expensesList.reduce((sum, e) => sum + e.amount, 0);
+
+        const fuelCost = expensesList
+          .filter((e) => e.category === 'fuel')
+          .reduce((sum, e) => sum + e.amount, 0);
+        const iceBaitCost = expensesList
+          .filter((e) => e.category === 'ice' || e.category === 'bait')
+          .reduce((sum, e) => sum + e.amount, 0);
+        const otherCost = expensesList
+          .filter((e) => e.category !== 'fuel' && e.category !== 'ice' && e.category !== 'bait')
+          .reduce((sum, e) => sum + e.amount, 0);
+
+        const revenue =
+          trip.salesList && trip.salesList.length > 0
+            ? trip.salesList.reduce((sum, s) => sum + s.totalAmount, 0)
+            : trip.revenue ?? 0;
+        const profit = revenue - totalExpenses;
+
+        return {
+          ...trip,
+          expensesList,
+          expenses: totalExpenses,
+          fuelCost,
+          iceBaitCost,
+          otherCost,
+          profit,
+        };
+      }),
+    );
+  };
+
   const addTripSale = (tripId: string, record: TripSaleRecord) => {
     setTrips((prev) =>
       prev.map((trip) => {
@@ -293,9 +371,10 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
         const salesList = [record, ...existingSales];
         const revenue = salesList.reduce((sum, s) => sum + s.totalAmount, 0);
 
-        const totalExpenses = trip.expensesList && trip.expensesList.length > 0
-          ? trip.expensesList.reduce((sum, e) => sum + e.amount, 0)
-          : (trip.fuelCost || 0) + (trip.iceBaitCost || 0) + (trip.otherCost || 0);
+        const totalExpenses =
+          trip.expensesList && trip.expensesList.length > 0
+            ? trip.expensesList.reduce((sum, e) => sum + e.amount, 0)
+            : (trip.fuelCost || 0) + (trip.iceBaitCost || 0) + (trip.otherCost || 0);
         const profit = revenue - totalExpenses;
 
         const activity: FishermanActivity = {
@@ -307,6 +386,56 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
           badge: `+Rs. ${record.totalAmount.toLocaleString()}`,
         };
         setActivities((actPrev) => [activity, ...actPrev]);
+
+        return {
+          ...trip,
+          salesList,
+          revenue,
+          profit,
+        };
+      }),
+    );
+  };
+
+  const updateTripSale = (
+    tripId: string,
+    saleId: string,
+    updates: Partial<TripSaleRecord>,
+  ) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const salesList = (trip.salesList || []).map((s) =>
+          s.id === saleId ? { ...s, ...updates } : s,
+        );
+        const revenue = salesList.reduce((sum, s) => sum + s.totalAmount, 0);
+        const totalExpenses =
+          trip.expensesList && trip.expensesList.length > 0
+            ? trip.expensesList.reduce((sum, e) => sum + e.amount, 0)
+            : (trip.fuelCost || 0) + (trip.iceBaitCost || 0) + (trip.otherCost || 0);
+        const profit = revenue - totalExpenses;
+
+        return {
+          ...trip,
+          salesList,
+          revenue,
+          profit,
+        };
+      }),
+    );
+  };
+
+  const deleteTripSale = (tripId: string, saleId: string) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const salesList = (trip.salesList || []).filter((s) => s.id !== saleId);
+        const revenue = salesList.reduce((sum, s) => sum + s.totalAmount, 0);
+        const totalExpenses =
+          trip.expensesList && trip.expensesList.length > 0
+            ? trip.expensesList.reduce((sum, e) => sum + e.amount, 0)
+            : (trip.fuelCost || 0) + (trip.iceBaitCost || 0) + (trip.otherCost || 0);
+        const profit = revenue - totalExpenses;
 
         return {
           ...trip,
@@ -482,7 +611,11 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     updateTripCatch,
     deleteTripCatch,
     addTripExpense,
+    updateTripExpense,
+    deleteTripExpense,
     addTripSale,
+    updateTripSale,
+    deleteTripSale,
     updateOrderStatus,
     replyInquiry,
     closeInquiry,

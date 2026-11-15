@@ -10,6 +10,7 @@ import type { TripSaleRecord } from '@/types';
 
 type BuyerType = 'wholesale_auction' | 'restaurant' | 'direct_consumer' | 'retail_stall';
 type PaymentStatus = 'paid_cash' | 'paid_bank' | 'pending';
+type SourceType = 'harbor_direct' | 'customer_app_order';
 
 const BUYER_PRESETS = [
   'Ocean Fresh Seafood Exporters',
@@ -30,17 +31,21 @@ function generateSaleId() {
 }
 
 export default function S20AddSaleScreen() {
-  const { tripId } = useLocalSearchParams<{ tripId?: string }>();
-  const { trips, addTripSale } = useFisherman();
+  const { tripId, saleId } = useLocalSearchParams<{ tripId?: string; saleId?: string }>();
+  const { trips, addTripSale, updateTripSale } = useFisherman();
 
   const trip = trips.find((t) => t.id === tripId) || trips[0];
+  const existingSale = trip?.salesList?.find((s) => s.id === saleId);
+  const isEditing = Boolean(existingSale);
 
-  const [buyerName, setBuyerName] = useState(BUYER_PRESETS[0]);
-  const [buyerType, setBuyerType] = useState<BuyerType>('wholesale_auction');
-  const [speciesSold, setSpeciesSold] = useState('Yellowfin Tuna (Grade A)');
-  const [quantityKgText, setQuantityKgText] = useState('20.0');
-  const [pricePerKgText, setPricePerKgText] = useState('2400');
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('paid_bank');
+  const [buyerName, setBuyerName] = useState(existingSale?.buyerName || BUYER_PRESETS[0]);
+  const [buyerType, setBuyerType] = useState<BuyerType>(existingSale?.buyerType || 'wholesale_auction');
+  const [speciesSold, setSpeciesSold] = useState(existingSale?.speciesSold || 'Yellowfin Tuna (Grade A)');
+  const [quantityKgText, setQuantityKgText] = useState(existingSale ? String(existingSale.quantityKg) : '20.0');
+  const [pricePerKgText, setPricePerKgText] = useState(existingSale ? String(existingSale.pricePerKg) : '2400');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(existingSale?.paymentStatus || 'paid_bank');
+  const [sourceType, setSourceType] = useState<SourceType>(existingSale?.sourceType || 'harbor_direct');
+  const [orderNumberInput, setOrderNumberInput] = useState(existingSale?.orderNumber || '');
 
   if (!trip) {
     return (
@@ -79,58 +84,127 @@ export default function S20AddSaleScreen() {
       return;
     }
 
-    if (quantityKg <= 0 || pricePerKg <= 0) {
+    if (quantityKg <= 0 || pricePerKg <= 0 || isNaN(quantityKg) || isNaN(pricePerKg)) {
       Alert.alert('Invalid Sale Numbers', 'Please enter positive values for quantity and unit price.');
       return;
     }
 
-    const newSale: TripSaleRecord = {
-      id: generateSaleId(),
-      buyerName: buyerName.trim(),
-      buyerType,
-      speciesSold: speciesSold.trim() || 'Mixed Fish Batch',
-      quantityKg,
-      pricePerKg,
-      totalAmount,
-      paymentStatus,
-      recordedAt: 'Just now',
-    };
+    if (isEditing && saleId) {
+      updateTripSale(trip.id, saleId, {
+        buyerName: buyerName.trim(),
+        buyerType,
+        speciesSold: speciesSold.trim() || 'Mixed Fish Batch',
+        quantityKg,
+        pricePerKg,
+        totalAmount,
+        paymentStatus,
+        sourceType,
+        orderNumber: sourceType === 'customer_app_order' ? (orderNumberInput.trim() || 'ORD-APP-771') : undefined,
+      });
 
-    addTripSale(trip.id, newSale);
+      Alert.alert(
+        'Sale Updated (S20)',
+        `Updated sale to ${buyerName.trim()} (${money(totalAmount)}) on voyage ${trip.tripNumber}.`,
+        [
+          {
+            text: 'View Sales (S19)',
+            onPress: () => router.replace({ pathname: '/fisherman/s19' as never, params: { tripId: trip.id } }),
+          },
+        ],
+      );
+    } else {
+      const newSale: TripSaleRecord = {
+        id: generateSaleId(),
+        buyerName: buyerName.trim(),
+        buyerType,
+        speciesSold: speciesSold.trim() || 'Mixed Fish Batch',
+        quantityKg,
+        pricePerKg,
+        totalAmount,
+        paymentStatus,
+        recordedAt: 'Just now',
+        sourceType,
+        orderNumber: sourceType === 'customer_app_order' ? (orderNumberInput.trim() || 'ORD-APP-771') : undefined,
+      };
 
-    Alert.alert(
-      'Sale Recorded (S20)',
-      `Sale of ${quantityKg} kg ${speciesSold} to ${buyerName} recorded.\nGross Revenue: ${money(totalAmount)}.`,
-      [
-        {
-          text: 'View Trip Details (S13)',
-          onPress: () => router.replace({ pathname: '/fisherman/s13' as never, params: { id: trip.id } }),
-        },
-      ],
-    );
+      addTripSale(trip.id, newSale);
+
+      Alert.alert(
+        'Sale Recorded (S20)',
+        `Sale of ${quantityKg.toFixed(1)} kg ${speciesSold} to ${buyerName} recorded.\nCalculated Revenue: ${money(totalAmount)}.`,
+        [
+          {
+            text: 'View Sales (S19)',
+            onPress: () => router.replace({ pathname: '/fisherman/s19' as never, params: { tripId: trip.id } }),
+          },
+        ],
+      );
+    }
   };
 
   return (
     <FishermanShell
-      title={`S20 · Record Sale (${trip.tripNumber})`}
-      subtitle="Fish buyer dispatch & revenue receipt"
+      title={isEditing ? `S20 · Edit Sale (${trip.tripNumber})` : `S20 · Record Sale (${trip.tripNumber})`}
+      subtitle={isEditing ? 'Modify dispatch transaction & buyer terms' : 'Fish buyer dispatch & revenue receipt'}
       back
-      onBack={() => router.replace({ pathname: '/fisherman/s13' as never, params: { id: trip.id } })}
+      onBack={() => router.replace({ pathname: '/fisherman/s19' as never, params: { tripId: trip.id } })}
     >
       <View style={styles.badgeRow}>
         <View style={styles.screenTag}>
           <Text style={styles.screenTagText}>SCREEN S20</Text>
         </View>
         <Text numberOfLines={1} style={styles.helperText}>
-          Add revenue transaction to voyage {trip.tripNumber}
+          {isEditing ? `Edit sale record on ${trip.tripNumber}` : `Add revenue transaction to voyage ${trip.tripNumber}`}
         </Text>
       </View>
 
       {/* FORM CARD */}
       <View style={styles.card}>
-        <Text style={styles.sectionHeading}>Buyer Information</Text>
+        <Text style={styles.sectionHeading}>Sales Channel & Source</Text>
+
+        {/* SOURCE TYPE: HARBOR DIRECT VS CUSTOMER APP ORDER */}
+        <View style={styles.sourceTypeRow}>
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: sourceType === 'harbor_direct' }}
+            onPress={() => setSourceType('harbor_direct')}
+            style={[styles.sourceBtn, sourceType === 'harbor_direct' && styles.sourceBtnActive]}
+          >
+            <Text style={[styles.sourceBtnText, sourceType === 'harbor_direct' && styles.sourceBtnTextActive]}>
+              ⚓ Harbor Direct Sale
+            </Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: sourceType === 'customer_app_order' }}
+            onPress={() => setSourceType('customer_app_order')}
+            style={[styles.sourceBtn, sourceType === 'customer_app_order' && styles.sourceBtnActive]}
+          >
+            <Text style={[styles.sourceBtnText, sourceType === 'customer_app_order' && styles.sourceBtnTextActive]}>
+              📱 Customer App Order
+            </Text>
+          </Pressable>
+        </View>
+
+        {sourceType === 'customer_app_order' ? (
+          <View style={styles.orderRefBox}>
+            <Text style={styles.label}>APP ORDER REFERENCE #</Text>
+            <TextInput
+              value={orderNumberInput}
+              onChangeText={setOrderNumberInput}
+              placeholder="e.g. ORD-2024-8842"
+              placeholderTextColor={ui.muted}
+              style={styles.input}
+            />
+            <Text style={styles.dedupHelper}>
+              🔒 Linking order reference guarantees zero double-counting in dashboard revenue.
+            </Text>
+          </View>
+        ) : null}
 
         {/* BUYER PRESETS */}
+        <Text style={[styles.label, { marginTop: 12 }]}>BUYER / CUSTOMER NAME</Text>
         <View style={styles.presetChipsWrap}>
           {BUYER_PRESETS.map((buyer) => {
             const isSelected = buyerName === buyer;
@@ -151,7 +225,7 @@ export default function S20AddSaleScreen() {
         </View>
 
         {/* CUSTOM BUYER INPUT */}
-        <Text style={[styles.label, { marginTop: 12 }]}>OR CUSTOM BUYER NAME</Text>
+        <Text style={[styles.label, { marginTop: 10 }]}>OR CUSTOM BUYER NAME</Text>
         <TextInput
           value={buyerName}
           onChangeText={setBuyerName}
@@ -182,7 +256,7 @@ export default function S20AddSaleScreen() {
         </View>
 
         {/* SPECIES SOLD */}
-        <Text style={[styles.label, { marginTop: 14 }]}>FISH SPECIES / CUTS</Text>
+        <Text style={[styles.label, { marginTop: 14 }]}>FISH TYPE / CUTS SOLD</Text>
         <TextInput
           value={speciesSold}
           onChangeText={setSpeciesSold}
@@ -194,21 +268,21 @@ export default function S20AddSaleScreen() {
         {/* QUANTITY & UNIT PRICE ROW */}
         <View style={styles.pricingGrid}>
           <View style={styles.priceCell}>
-            <Text style={styles.label}>QUANTITY (KG)</Text>
+            <Text style={styles.label}>QUANTITY SOLD (KG)</Text>
             <View style={styles.priceInputRow}>
               <TextInput
                 value={quantityKgText}
                 onChangeText={setQuantityKgText}
                 keyboardType="numeric"
                 style={styles.miniInput}
-                placeholder="0"
+                placeholder="0.0"
               />
               <Text style={styles.unitSuffix}>KG</Text>
             </View>
           </View>
 
           <View style={styles.priceCell}>
-            <Text style={styles.label}>RATE / KG (RS.)</Text>
+            <Text style={styles.label}>SELLING PRICE / KG (RS.)</Text>
             <View style={styles.priceInputRow}>
               <TextInput
                 value={pricePerKgText}
@@ -238,7 +312,7 @@ export default function S20AddSaleScreen() {
 
         {/* TOTAL SALE REVENUE CALLOUT */}
         <View style={styles.revenueCallout}>
-          <Text style={styles.revenueCalloutLabel}>TOTAL SALE REVENUE</Text>
+          <Text style={styles.revenueCalloutLabel}>CALCULATED REVENUE (QTY × PRICE/KG)</Text>
           <Text style={styles.revenueCalloutAmount}>+ {money(totalAmount)}</Text>
           <Text style={styles.revenueCalloutSub}>
             {quantityKg} kg × Rs. {pricePerKg.toLocaleString()}/kg
@@ -281,15 +355,17 @@ export default function S20AddSaleScreen() {
           style={styles.saveBtn}
         >
           <FishermanIcon name="plus" size={15} color="#FFFFFF" />
-          <Text style={styles.saveBtnText}>Record Sale → S13</Text>
+          <Text style={styles.saveBtnText}>
+            {isEditing ? 'Save Sale Changes → S19' : 'Record Sale → S19'}
+          </Text>
         </Pressable>
 
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.replace({ pathname: '/fisherman/s13' as never, params: { id: trip.id } })}
+          onPress={() => router.replace({ pathname: '/fisherman/s19' as never, params: { tripId: trip.id } })}
           style={styles.cancelBtn}
         >
-          <Text style={styles.cancelBtnText}>Cancel</Text>
+          <Text style={styles.cancelBtnText}>Cancel (Back to S19)</Text>
         </Pressable>
       </View>
     </FishermanShell>
@@ -339,6 +415,48 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: ui.navy,
     marginBottom: 10,
+  },
+  sourceTypeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  sourceBtn: {
+    flex: 1,
+    backgroundColor: '#F8FCFD',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: ui.border,
+  },
+  sourceBtnActive: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#059669',
+  },
+  sourceBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: ui.navy,
+  },
+  sourceBtnTextActive: {
+    color: '#059669',
+    fontWeight: '900',
+  },
+  orderRefBox: {
+    backgroundColor: '#F0FDF4',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    marginBottom: 12,
+  },
+  dedupHelper: {
+    fontSize: 10,
+    color: '#15803D',
+    fontWeight: '700',
+    marginTop: 6,
   },
   label: {
     fontSize: 9,
