@@ -7,8 +7,10 @@ import type {
   FishermanInquiryStatus,
   FishermanOrder,
   FishermanOrderStatus,
+  FishermanPaymentTransaction,
   FishermanProfile,
   FishingTrip,
+  PaymentStatusType,
   TripCatchRecord,
   TripExpenseRecord,
   TripSaleRecord,
@@ -19,6 +21,7 @@ import {
   defaultFishermanInquiries,
   defaultFishermanOrders,
   defaultFishermanSummary,
+  defaultFishermanTransactions,
   defaultFishingTrips,
 } from '@/data/fishermanData';
 import { fishListings } from '@/data/mockData';
@@ -26,6 +29,7 @@ import { fishListings } from '@/data/mockData';
 type FishermanContextType = {
   profile: FishermanProfile;
   orders: FishermanOrder[];
+  transactions: FishermanPaymentTransaction[];
   inquiries: FishermanInquiryItem[];
   trips: FishingTrip[];
   listings: FishListing[];
@@ -48,6 +52,7 @@ type FishermanContextType = {
   deleteTripSale: (tripId: string, saleId: string) => void;
   updateOrderStatus: (orderId: string, nextStatus?: FishermanOrderStatus) => void;
   updateOrder: (orderId: string, updates: Partial<FishermanOrder>) => void;
+  updateTransactionStatus: (transactionId: string, status: PaymentStatusType) => void;
   replyInquiry: (inquiryId: string, replyText: string) => void;
   closeInquiry: (inquiryId: string) => void;
   updateInquiryStatus: (inquiryId: string, status: FishermanInquiryStatus) => void;
@@ -63,6 +68,7 @@ const FishermanContext = createContext<FishermanContextType | null>(null);
 export function FishermanProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<FishermanProfile>(currentFishermanProfile);
   const [orders, setOrders] = useState<FishermanOrder[]>(defaultFishermanOrders);
+  const [transactions, setTransactions] = useState<FishermanPaymentTransaction[]>(defaultFishermanTransactions);
   const [inquiries, setInquiries] = useState<FishermanInquiryItem[]>(defaultFishermanInquiries);
   const [trips, setTrips] = useState<FishingTrip[]>(defaultFishingTrips);
   const [listings, setListings] = useState<FishListing[]>(fishListings);
@@ -498,6 +504,12 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateTransactionStatus = (transactionId: string, status: PaymentStatusType) => {
+    setTransactions((prev) =>
+      prev.map((t) => (t.id === transactionId || t.transactionRef === transactionId ? { ...t, status } : t)),
+    );
+  };
+
   const replyInquiry = (inquiryId: string, replyText: string) => {
     setInquiries((prev) =>
       prev.map((inq) => {
@@ -614,6 +626,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
   const value: FishermanContextType = {
     profile,
     orders: isSimulatingEmpty ? [] : orders,
+    transactions: isSimulatingEmpty ? [] : transactions,
     inquiries: isSimulatingEmpty ? [] : inquiries,
     trips,
     listings,
@@ -642,6 +655,7 @@ export function FishermanProvider({ children }: { children: ReactNode }) {
     deleteTripSale,
     updateOrderStatus,
     updateOrder,
+    updateTransactionStatus,
     replyInquiry,
     closeInquiry,
     updateInquiryStatus,

@@ -478,6 +478,27 @@ export default function S23OrderDetailsScreen() {
             </Text>
           </View>
         </View>
+
+        <View style={styles.cardDivider} />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() =>
+            router.push({
+              pathname: '/fisherman/s26' as never,
+              params: {
+                orderNumber: order.orderNumber,
+                id: order.id,
+                from: 's23',
+              },
+            })
+          }
+          style={styles.viewPaymentReceiptRow}
+        >
+          <FishermanIcon name="sparkles" size={13} color={ui.tealDark} />
+          <Text style={styles.viewPaymentReceiptText}>
+            View Payment & Transaction Settlement (S26) →
+          </Text>
+        </Pressable>
       </View>
 
       {/* 02. BUTTONS & NAVIGATION: BACK -> S22 */}
@@ -995,6 +1016,17 @@ const styles = StyleSheet.create({
     color: '#D97706',
     fontSize: 10,
     fontWeight: '900',
+  },
+  viewPaymentReceiptRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingTop: 4,
+  },
+  viewPaymentReceiptText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: ui.tealDark,
   },
   footerSection: {
     marginTop: 4,

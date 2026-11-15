@@ -100,6 +100,29 @@ export type FishermanOrder = {
   deliveryRiderName?: string;
   deliveryRiderPhone?: string;
   rejectionReason?: string;
+  transactionRef?: string;
+};
+
+export type PaymentStatusType = 'paid' | 'pending' | 'failed' | 'refunded';
+export type PaymentMethodType = 'COD' | 'Online' | 'Bank Transfer';
+
+export type FishermanPaymentTransaction = {
+  id: string;
+  transactionRef: string;
+  orderId: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone?: string;
+  method: PaymentMethodType;
+  amount: number;
+  status: PaymentStatusType;
+  transactionDate: string;
+  gatewayFee?: number;
+  netPayout?: number;
+  paymentChannel?: string;
+  cardLastFour?: string; // Demo simulated token only, e.g. "•••• 4242"
+  bankAccountRef?: string;
+  notes?: string;
 };
 
 export type FishermanInquiryStatus = 'new' | 'responded' | 'closed';

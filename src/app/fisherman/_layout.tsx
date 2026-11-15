@@ -17,6 +17,8 @@ export default function FishermanLayout() {
     's23',
     's24',
     's25',
+    's26',
+    's27',
     's06',
     's12',
     's09',
@@ -89,6 +91,8 @@ export default function FishermanLayout() {
           <Stack.Screen name="s23" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s24" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s25" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s26" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="s27" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s09" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s10" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="s21" options={{ animation: 'slide_from_right' }} />

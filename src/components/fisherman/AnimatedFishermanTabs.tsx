@@ -32,7 +32,7 @@ export function AnimatedFishermanTabs({ current }: { current: string }) {
   const normalizedKey =
     current === 's01'
       ? 'dashboard'
-      : current === 's22' || current === 's23' || current === 's24' || current === 's25' || current === 's09' || current === 's10'
+      : current === 's22' || current === 's23' || current === 's24' || current === 's25' || current === 's26' || current === 's27' || current === 's09' || current === 's10'
       ? 'orders'
       : current === 's06' || current === 's07' || current === 's08'
       ? 'listings'

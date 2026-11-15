@@ -125,9 +125,9 @@ export default function S22OrdersScreen() {
       title="S22 · Customer Orders"
       subtitle="Marketplace orders, preparation & fulfillment"
       back
-      rightIcon="bag"
-      rightLabel={newOrdersCount > 0 ? `${newOrdersCount} New` : 'Orders'}
-      onRightPress={() => setFilter('pending')}
+      rightIcon="revenue"
+      rightLabel="Sales (S27)"
+      onRightPress={() => router.push('/fisherman/s27')}
     >
       {/* SCREEN TAG & EXPANDED FEATURE BADGE */}
       <View style={styles.badgeRow}>
