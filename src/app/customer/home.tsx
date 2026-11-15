@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Image,
-  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -59,11 +58,14 @@ export default function CustomerHome() {
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Open cart"
+            accessibilityLabel={`Open cart, ${cart.length} items`}
             onPress={() => router.push('/customer/cart')}
             style={styles.bag}
           >
-            <CustomerIcon name="bag" size={25} color="#0B1531" />
+            <CustomerIcon name="bag" size={28} color="#0B1531" />
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cart.length}</Text>
+            </View>
           </Pressable>
         </View>
 
@@ -87,28 +89,57 @@ export default function CustomerHome() {
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push('/customer/cart')}
-            style={styles.shortcut}
+            style={[styles.shortcut, styles.cartShortcut]}
           >
-            <CustomerIcon name="bag" size={23} color="#009D96" />
-            <Text style={styles.shortcutText}>Cart ({cart.length})</Text>
+            <CustomerIcon name="bag" size={27} color="#FFFFFF" />
+            <View style={styles.shortcutDivider} />
+            <View style={styles.shortcutCopy}>
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                style={[styles.shortcutText, styles.cartText]}
+              >
+                My Cart
+              </Text>
+              <Text style={[styles.shortcutHint, styles.cartText]}>
+                {cart.length} {cart.length === 1 ? 'item' : 'items'}
+              </Text>
+            </View>
+            <CustomerIcon name="chevron-right" size={17} color="#FFFFFF" />
           </Pressable>
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push('/customer/orders')}
             style={[styles.shortcut, styles.orders]}
           >
-            <CustomerIcon name="check" size={24} color="#00666C" />
-            <Text style={styles.shortcutText}>My Orders</Text>
+            <CustomerIcon name="package" size={28} color="#0B1531" />
+            <View style={[styles.shortcutDivider, styles.ordersDivider]} />
+            <View style={styles.shortcutCopy}>
+              <Text numberOfLines={1} adjustsFontSizeToFit style={styles.shortcutText}>
+                My Orders
+              </Text>
+              <Text style={styles.shortcutHint}>Track purchases</Text>
+            </View>
+            <CustomerIcon name="chevron-right" size={17} color="#0B1531" />
           </Pressable>
         </View>
 
-        <ImageBackground
-          source={hero}
-          resizeMode="cover"
-          style={styles.hero}
-          imageStyle={styles.heroImage}
-        >
-          <View style={styles.heroShade} />
+        <View style={styles.trustStrip}>
+          {(
+            [
+              { icon: 'truck', label: 'Fresh delivery' },
+              { icon: 'shield', label: 'Verified sellers' },
+              { icon: 'leaf', label: 'Quality assured' },
+            ] as const
+          ).map((item, index) => (
+            <View key={item.label} style={[styles.trustItem, index > 0 && styles.trustDivider]}>
+              <CustomerIcon name={item.icon} size={18} color="#007D82" />
+              <Text style={styles.trustText}>{item.label}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={styles.hero}>
+          <Image source={hero} resizeMode="cover" style={styles.heroImage} />
           <View style={styles.heroCopy}>
             <Text style={styles.eyebrow}>FRESHNESS, DIRECT FROM THE SEA</Text>
             <View style={styles.yellowLine} />
@@ -116,15 +147,12 @@ export default function CustomerHome() {
               Catch of the day,{'\n'}
               <Text style={styles.lime}>straight to you.</Text>
             </Text>
-            <Text style={styles.heroDescription}>
-              Discover quality seafood from local fishermen, without the middleman.
-            </Text>
             <Pressable accessibilityRole="button" onPress={openSearch} style={styles.heroButton}>
               <Text style={styles.heroButtonText}>Explore collection</Text>
               <CustomerIcon name="chevron-right" size={18} color="#09243A" />
             </Pressable>
           </View>
-        </ImageBackground>
+        </View>
 
         <Pressable
           accessibilityRole="button"
@@ -223,7 +251,9 @@ export default function CustomerHome() {
                   </Text>
                   <View style={styles.listingLocation}>
                     <CustomerIcon name="pin" size={13} color="#667D85" />
-                    <Text style={styles.listingMeta}>{item.location} ? {item.stockLabel}</Text>
+                    <Text style={styles.listingMeta}>
+                      {item.location} ? {item.stockLabel}
+                    </Text>
                   </View>
                   <Text style={styles.fishPrice}>Rs. {item.price.toLocaleString()}/kg</Text>
                 </View>
@@ -267,7 +297,9 @@ export default function CustomerHome() {
         ))}
         <View style={styles.picksHeading}>
           <View style={styles.picksCopy}>
-            <Text accessibilityRole="header" style={styles.sectionTitle}>More fresh finds</Text>
+            <Text accessibilityRole="header" style={styles.sectionTitle}>
+              More fresh finds
+            </Text>
             <Text style={styles.sectionSubtitle}>Discover more catches from nearby sellers</Text>
           </View>
           <Pressable onPress={openSearch} accessibilityRole="button" style={styles.seeAll}>
@@ -288,7 +320,8 @@ export default function CustomerHome() {
         <View style={styles.demoDisclaimer}>
           <CustomerIcon name="sparkles" size={18} color="#007D82" />
           <Text style={styles.demoNote}>
-            FishMate UI preview ? Prices, sellers, ratings and delivery times are demo data, not real offers.
+            FishMate UI preview ? Prices, sellers, ratings and delivery times are demo data, not
+            real offers.
           </Text>
         </View>
       </ScrollView>
@@ -331,6 +364,44 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-6deg' }],
     opacity: 0.35,
   },
+  cartBadge: {
+    position: 'absolute',
+    right: -5,
+    top: -7,
+    minWidth: 23,
+    height: 23,
+    borderRadius: 12,
+    paddingHorizontal: 5,
+    backgroundColor: '#00C8BF',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartBadgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: '900' },
+  cartShortcut: { backgroundColor: '#007F87', borderColor: '#00C8BF' },
+  cartText: { color: '#FFFFFF' },
+  shortcutCopy: { flex: 1, minWidth: 0 },
+  shortcutHint: { color: '#526575', fontSize: 10, marginTop: 4 },
+  shortcutDivider: { height: 29, width: 1, backgroundColor: '#33DBD5' },
+  ordersDivider: { backgroundColor: '#9EDFE1' },
+  trustStrip: {
+    flexDirection: 'row',
+    paddingVertical: 11,
+    borderRadius: 25,
+    backgroundColor: '#DDF9F8',
+    marginBottom: 14,
+  },
+  trustItem: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 5,
+    paddingHorizontal: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  trustDivider: { borderLeftWidth: 1, borderLeftColor: '#A0DFE2' },
+  trustText: { fontSize: 9, fontWeight: '600', color: '#123044', flexShrink: 1 },
   safe: { flex: 1, backgroundColor: '#EFFCFD' },
   topGlow: {
     position: 'absolute',
@@ -388,14 +459,15 @@ const styles = StyleSheet.create({
   chevron: { fontSize: 17, color: '#0B1531' },
   locationDivider: { height: 15, width: 1, backgroundColor: '#C2DEE1', marginHorizontal: 4 },
   locationValue: { flex: 1, textAlign: 'right', color: '#0B1531', fontSize: 10, fontWeight: '800' },
-  shortcuts: { flexDirection: 'row', gap: 12, marginBottom: 17 },
+  shortcuts: { flexDirection: 'row', gap: 10, marginBottom: 13 },
   shortcut: {
     flex: 1,
     flexDirection: 'row',
-    gap: 12,
+    gap: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 51,
+    minHeight: 65,
+    paddingHorizontal: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#FFFFFF',
@@ -406,10 +478,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     elevation: 3,
   },
-  orders: { backgroundColor: '#DFF9F8' },
-  shortcutText: { fontWeight: '800', color: '#0B1531', fontSize: 15 },
+  orders: { backgroundColor: '#F5FEFE', borderColor: '#87DBDF' },
+  shortcutText: { fontWeight: '800', color: '#0B1531', fontSize: 14 },
   hero: {
-    minHeight: 224,
+    minHeight: 180,
     borderRadius: 28,
     overflow: 'hidden',
     backgroundColor: '#006277',
@@ -417,16 +489,15 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
     justifyContent: 'center',
   },
-  heroImage: { borderRadius: 27 },
-  heroShade: {
+  heroImage: {
     position: 'absolute',
     top: 0,
-    bottom: 0,
     left: 0,
-    width: '62%',
-    backgroundColor: 'rgba(0,59,72,0.28)',
+    width: '100%',
+    height: '100%',
+    borderRadius: 27,
   },
-  heroCopy: { padding: 19, paddingVertical: 23 },
+  heroCopy: { padding: 19, paddingVertical: 18 },
   eyebrow: { color: '#E9FFFF', fontSize: 9, letterSpacing: 1.7, fontWeight: '700' },
   yellowLine: {
     width: 62,
@@ -442,16 +513,9 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     letterSpacing: -0.7,
     fontWeight: '900',
-    maxWidth: '85%',
+    maxWidth: '94%',
   },
   lime: { color: '#E5FB70' },
-  heroDescription: {
-    color: '#E9FFFF',
-    fontSize: 11,
-    lineHeight: 16,
-    maxWidth: '64%',
-    marginTop: 9,
-  },
   heroButton: {
     flexDirection: 'row',
     gap: 9,
@@ -564,6 +628,14 @@ const styles = StyleSheet.create({
   listingDescription: { fontSize: 11, lineHeight: 16, color: '#667D85' },
   listingLocation: { flexDirection: 'row', alignItems: 'center', gap: 4, marginVertical: 4 },
   listingMeta: { flex: 1, fontSize: 10, color: '#667D85' },
-  demoDisclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, padding: 14, borderRadius: 17, backgroundColor: '#DFF5F3', marginTop: 17 },
+  demoDisclaimer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    padding: 14,
+    borderRadius: 17,
+    backgroundColor: '#DFF5F3',
+    marginTop: 17,
+  },
   demoNote: { flex: 1, color: '#667D85', fontSize: 11, lineHeight: 17 },
 });

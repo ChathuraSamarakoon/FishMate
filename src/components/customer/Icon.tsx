@@ -1,8 +1,32 @@
 import { Image, type ImageStyle, type StyleProp } from 'react-native';
 
-type IconName = 'home' | 'search' | 'message' | 'user' | 'arrow-left' | 'pin' | 'bag' | 'heart' | 'filter' | 'check' | 'plus' | 'minus' | 'phone' | 'chevron-right' | 'clock' | 'sparkles';
+type IconName =
+  | 'truck'
+  | 'shield'
+  | 'leaf'
+  | 'package'
+  | 'home'
+  | 'search'
+  | 'message'
+  | 'user'
+  | 'arrow-left'
+  | 'pin'
+  | 'bag'
+  | 'heart'
+  | 'filter'
+  | 'check'
+  | 'plus'
+  | 'minus'
+  | 'phone'
+  | 'chevron-right'
+  | 'clock'
+  | 'sparkles';
 
 const icons = {
+  truck: require('../../../assets/customer/icons/truck.png'),
+  shield: require('../../../assets/customer/icons/shield.png'),
+  leaf: require('../../../assets/customer/icons/leaf.png'),
+  package: require('../../../assets/customer/icons/package.png'),
   home: require('../../../assets/customer/icons/home.png'),
   search: require('../../../assets/customer/icons/search.png'),
   message: require('../../../assets/customer/icons/message.png'),
@@ -21,6 +45,22 @@ const icons = {
   sparkles: require('../../../assets/customer/icons/sparkles.png'),
 } as const;
 
-export function CustomerIcon({ name, color = '#123C57', size = 22, style }: { name: IconName; color?: string; size?: number; style?: StyleProp<ImageStyle> }) {
-  return <Image source={icons[name]} resizeMode="contain" style={[{ width: size, height: size, tintColor: color }, style]} />;
+export function CustomerIcon({
+  name,
+  color = '#123C57',
+  size = 22,
+  style,
+}: {
+  name: IconName;
+  color?: string;
+  size?: number;
+  style?: StyleProp<ImageStyle>;
+}) {
+  return (
+    <Image
+      source={icons[name]}
+      resizeMode="contain"
+      style={[{ width: size, height: size, tintColor: color }, style]}
+    />
+  );
 }
