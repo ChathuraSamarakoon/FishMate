@@ -3,10 +3,10 @@ const expo = require('eslint-config-expo/flat');
 const prettier = require('eslint-config-prettier/flat');
 
 module.exports = defineConfig([
+  { ignores: ['dist/**', '.expo/**'] },
   expo,
   prettier,
   {
-    ignores: ['dist/**', '.expo/**'],
     rules: {
       'react-hooks/refs': 'off',
       'react/no-unescaped-entities': 'off',
