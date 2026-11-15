@@ -20,7 +20,7 @@ export default function ConnectWithFisherman() {
   const { sellerId, listingId, quantityKg } = useLocalSearchParams<{ sellerId?: string; listingId?: string; quantityKg?: string }>();
   const seller = getFishermanById(sellerId);
   const requestedListing = listingId ? getListingById(listingId) : undefined;
-  const [selectedListingId, setSelectedListingId] = useState(() => requestedListing?.sellerId === sellerId ? requestedListing.id : '');
+  const [selectedListingId, setSelectedListingId] = useState(() => requestedListing?.sellerId === sellerId ? requestedListing?.id ?? '' : '');
   const [kg, setKg] = useState(quantityKg ?? '');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');

@@ -13,9 +13,24 @@ export default function HomeScreen() {
       <Text style={styles.title}>{account?`Welcome, ${account.fullName.split(' ')[0]}!`:'Welcome to FishMate'}</Text>
       <Text style={styles.text}>{account?(account.role==='customer'?'Customer marketplace':'Fisherman dashboard'):'You are not currently signed in.'}</Text>
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>{account?'Your account is ready':'Frontend preview'}</Text>
-        <Text style={styles.cardText}>{account?`Role: ${account.role==='customer'?'Customer':'Fisherman'}\nPhone: ${account.phone}`:'Log in to see your demo account.'}</Text>
-        <Text style={styles.muted}>The full marketplace and trip-management screens will be built in the next stages.</Text>
+        <Text style={styles.cardTitle}>{account?'Your account is ready':'Choose a role experience'}</Text>
+        <Text style={styles.cardText}>{account?`Role: ${account.role==='customer'?'Customer':'Fisherman'}\nPhone: ${account.phone}`:'Explore FishMate as a Fisherman or a Customer:'}</Text>
+        <View style={styles.navRow}>
+          <Pressable
+            accessibilityRole="button"
+            style={styles.navButtonPrimary}
+            onPress={() => router.push('/fisherman/dashboard')}
+          >
+            <Text style={styles.navButtonPrimaryText}>⚓ Open Fisherman Dashboard</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            style={styles.navButtonSecondary}
+            onPress={() => router.push('/customer/home')}
+          >
+            <Text style={styles.navButtonSecondaryText}>🛒 Open Customer Marketplace</Text>
+          </Pressable>
+        </View>
       </View>
       <Pressable accessibilityRole="button" style={styles.button} onPress={()=>{logout();router.replace('/login');}}><Text style={styles.buttonLabel}>{account?'Log out':'Go to Login'}</Text></Pressable>
     </View>
@@ -27,5 +42,10 @@ const styles=StyleSheet.create({
  title:{color:ui.navy,fontSize:27,fontWeight:'800',textAlign:'center',marginTop:12},text:{color:ui.gray,textAlign:'center',marginTop:8},
  card:{backgroundColor:'#FFFFFF',padding:24,borderRadius:22,marginTop:30,borderColor:ui.border,borderWidth:1},
  cardTitle:{color:ui.navy,fontWeight:'800',fontSize:17},cardText:{color:ui.navy,fontSize:14,lineHeight:24,marginTop:12},muted:{color:ui.gray,fontSize:12,lineHeight:20,marginTop:17},
- button:{backgroundColor:ui.teal,padding:17,borderRadius:15,alignItems:'center',marginTop:22},buttonLabel:{color:'#FFFFFF',fontWeight:'800'},
+ navRow:{marginTop:18,gap:10},
+ navButtonPrimary:{backgroundColor:ui.teal,paddingVertical:14,paddingHorizontal:16,borderRadius:14,alignItems:'center'},
+ navButtonPrimaryText:{color:'#FFFFFF',fontWeight:'900',fontSize:13},
+ navButtonSecondary:{backgroundColor:ui.light,paddingVertical:13,paddingHorizontal:16,borderRadius:14,alignItems:'center',borderWidth:1,borderColor:ui.border},
+ navButtonSecondaryText:{color:ui.navy,fontWeight:'800',fontSize:13},
+ button:{backgroundColor:ui.navy,padding:16,borderRadius:15,alignItems:'center',marginTop:22},buttonLabel:{color:'#FFFFFF',fontWeight:'800'},
 });

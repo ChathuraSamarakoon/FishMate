@@ -18,7 +18,7 @@ const DIGITS = 4;
 export default function OTPVerificationScreen() {
   const { mode='register',phone='' } = useLocalSearchParams<{mode?:string;phone?:string}>();
   const forReset=mode==='reset';
-  const input=useRef<TextInput>(null);
+  const input=useRef<any>(null);
   const [code,setCode]=useState('');
   const codeRef=useRef('');
   const [status,setStatus]=useState<VerifyStatus>('entering');

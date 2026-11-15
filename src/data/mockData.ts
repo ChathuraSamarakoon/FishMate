@@ -184,3 +184,5 @@ export function getFishermanById(id?: string) {
 export function getListingsBySellerId(sellerId?: string) {
   return fishListings.filter((item) => item.sellerId === sellerId);
 }
+
+export * from './fishermanData';

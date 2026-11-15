@@ -13,9 +13,10 @@ export default function LoginScreen() {
     setError('');
     const account=login(normalizePhone(phone),password);
     if(!account) return setError('Invalid demo phone number or password. Please try again.');
-    router.replace(account.role === 'customer' ? '/customer/home' : '/home');
+    router.replace(account.role === 'customer' ? '/customer/home' : '/fisherman/dashboard');
   };
   const useDemo=()=>{setPhone('0771234567');setPassword('FishMate123');setError('');};
+  const useFishermanDemo=()=>{setPhone('0712345678');setPassword('FishMate123');setError('');};
   return <AuthShell eyebrow="Welcome back" title="Log in to FishMate" subtitle="Your marketplace, your fishing community. Let's get you connected." backTo="/welcome">
     {registered==='1'&&<InlineAlert kind="success" message="Account verified successfully! You can now log in."/>}
     {reset==='1'&&<InlineAlert kind="success" message="Password updated successfully. Sign in with your new password."/>}
@@ -29,7 +30,10 @@ export default function LoginScreen() {
       <Text style={styles.demoHeading}>FRONTEND DEMO ACCOUNT</Text>
       <Text style={styles.demoCopy}>Customer: 0771234567  •  FishMate123</Text>
       <Text style={styles.demoCopy}>Fisherman: 0712345678  •  FishMate123</Text>
-      <Pressable accessibilityRole="button" onPress={useDemo} style={styles.demoButton}><Text style={styles.demoButtonText}>Fill customer demo login →</Text></Pressable>
+      <View style={styles.demoButtonsRow}>
+        <Pressable accessibilityRole="button" onPress={useDemo} style={styles.demoButton}><Text style={styles.demoButtonText}>Fill customer →</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={useFishermanDemo} style={styles.demoButton}><Text style={styles.demoButtonText}>Fill fisherman →</Text></Pressable>
+      </View>
     </View>
   </AuthShell>;
 }
@@ -37,5 +41,8 @@ const styles=StyleSheet.create({
   forgot:{alignSelf:'flex-end',marginTop:-4,marginBottom:22,paddingVertical:5},forgotText:{fontSize:12,color:ui.teal,fontWeight:'800'},
   demoBox:{marginTop:22,padding:15,backgroundColor:'#F1F8F7',borderRadius:15,borderWidth:1,borderColor:'#DFEEEB'},
   demoHeading:{fontSize:9,letterSpacing:1.5,fontWeight:'800',color:ui.teal,marginBottom:8},
-  demoCopy:{fontSize:11,color:ui.navy,lineHeight:19},demoButton:{marginTop:10},demoButtonText:{fontSize:12,fontWeight:'800',color:ui.teal},
+  demoCopy:{fontSize:11,color:ui.navy,lineHeight:19},
+  demoButtonsRow:{flexDirection:'row',gap:12,marginTop:10},
+  demoButton:{paddingVertical:4},
+  demoButtonText:{fontSize:12,fontWeight:'800',color:ui.teal},
 });
